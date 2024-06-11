@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+	    {
+		"type": "shell",
+		"label": "buildZephyrNative",
+		"command": "west build -b native_posix_64 @app_folder@",
+		"problemMatcher": [
+		    "$gcc"
+		],
+		"group": "build",
+	    }
+	]
+}

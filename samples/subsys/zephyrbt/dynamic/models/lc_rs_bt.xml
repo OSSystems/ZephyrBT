@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+  main_tree_to_execute="A">
+  <BehaviorTree ID="A">
+    <Sequence name="A">
+      <Sequence name="B">
+        <Sequence name="F">
+          <AlwaysSuccess name="I"/>
+          <AlwaysSuccess name="J"/>
+          <AlwaysSuccess name="K"/>
+        </Sequence>
+        <AlwaysSuccess name="G"/>
+      </Sequence>
+      <AlwaysSuccess name="C"/>
+      <Sequence name="D">
+        <Sequence name="H">
+          <AlwaysSuccess name="L"/>
+          <AlwaysSuccess name="M"/>
+        </Sequence>
+      </Sequence>
+      <AlwaysSuccess name="E"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel/>
+
+</root>

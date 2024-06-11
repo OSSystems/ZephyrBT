@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="Modelo">
+  <BehaviorTree ID="Modelo">
+    <Fallback>
+      <Sequence>
+        <Fallback>
+          <BallFound GPIO0=""/>
+          <FindBall GPIO1="0"
+                    IN=""
+                    OUT=""/>
+        </Fallback>
+        <Fallback>
+          <BallClose/>
+          <ApprochBall/>
+        </Fallback>
+        <Fallback>
+          <BallGrasped/>
+          <GraspBall/>
+        </Fallback>
+        <Fallback>
+          <BinClose/>
+          <ApprochBin/>
+        </Fallback>
+        <Fallback>
+          <BallPlaced/>
+          <PlaceBall/>
+        </Fallback>
+      </Sequence>
+      <Timeout msec="1250">
+        <AskForHelp/>
+      </Timeout>
+    </Fallback>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="ApprochBall"
+            editable="true"/>
+    <Action ID="ApprochBin"
+            editable="true"/>
+    <Action ID="AskForHelp"
+            editable="true"/>
+    <Condition ID="BallClose"
+               editable="true"/>
+    <Condition ID="BallFound"
+               editable="true">
+      <input_port name="GPIO0"/>
+    </Condition>
+    <Condition ID="BallGrasped"
+               editable="true"/>
+    <Condition ID="BallPlaced"
+               editable="true"/>
+    <Condition ID="BinClose"
+               editable="true"/>
+    <Action ID="FindBall"
+            editable="true">
+      <inout_port name="GPIO1"
+                  default="0">Teste de Descrição</inout_port>
+      <input_port name="IN"/>
+      <output_port name="OUT"/>
+    </Action>
+    <Action ID="GraspBall"
+            editable="true"/>
+    <Action ID="PlaceBall"
+            editable="true"/>
+  </TreeNodesModel>
+
+</root>

@@ -1,0 +1,26 @@
+# Copyright (c) 2024 OS Systems
+# Copyright (c) 2024 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+manifest:
+  defaults:
+    remote: ossystems
+
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: ossystems
+      url-base: git@github.com:OSSystems
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: main
+      import:
+        path-prefix: deps
+        path-allowlist:
+          - modules/hal/cmsis
+          - modules/hal/stm32
+
+  self:
+    import:

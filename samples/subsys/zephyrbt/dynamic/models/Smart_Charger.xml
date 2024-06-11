@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="Smart Charger">
+  <BehaviorTree ID="Calibration">
+    <Sequence name="Calibration">
+      <EnterCalibration/>
+      <Fallback>
+        <Sequence>
+          <HasVoltageError/>
+          <VoltageError/>
+        </Sequence>
+        <Sequence>
+          <HasCurrentError/>
+          <CurrentError/>
+        </Sequence>
+        <Sequence>
+          <RunOnce then_skip="true">
+            <CalibrateVoltage/>
+          </RunOnce>
+          <RunOnce then_skip="true">
+            <CalibrateCurrent/>
+          </RunOnce>
+        </Sequence>
+      </Fallback>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Charger">
+    <Sequence>
+      <Sequence>
+        <MissingCalibrationData/>
+        <MissingCalibrationDataError/>
+      </Sequence>
+      <Sequence>
+        <Inverter>
+          <HasMinimumCurrent current="0.01"/>
+        </Inverter>
+        <Unplugged/>
+      </Sequence>
+      <Sequence>
+        <Inverter>
+          <HasMinimumVoltage voltage="18"/>
+        </Inverter>
+        <Fallback>
+          <TimeoutInHours hours="12">
+            <Trickle/>
+          </TimeoutInHours>
+          <OverflowError/>
+        </Fallback>
+      </Sequence>
+      <Sequence>
+        <Inverter>
+          <HasMinimumVoltage voltage="28.6"/>
+        </Inverter>
+        <Fallback>
+          <TimeoutInHours hours="12">
+            <Bulk/>
+          </TimeoutInHours>
+          <OverflowError/>
+        </Fallback>
+      </Sequence>
+      <Sequence>
+        <HasMinimumCurrent current="CURRENT_ABSORPTION2"/>
+        <Fallback>
+          <TimeoutInHours hours="12">
+            <Absorption/>
+          </TimeoutInHours>
+          <OverflowError/>
+        </Fallback>
+      </Sequence>
+      <Sequence>
+        <HasMinimumCurrent current="CURRENT_FLOATING"/>
+        <Fallback>
+          <TimeoutInHours hours="12">
+            <Absorption2/>
+          </TimeoutInHours>
+          <OverflowError/>
+        </Fallback>
+      </Sequence>
+      <Floating/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="General Errors">
+    <Sequence>
+      <Sequence>
+        <HasFanError/>
+        <FanError/>
+      </Sequence>
+      <Sequence>
+        <HasOvervoltageError/>
+        <OvervoltageError/>
+      </Sequence>
+      <Sequence>
+        <HasOvercurrentError/>
+        <OvercurrentError/>
+      </Sequence>
+      <Sequence>
+        <HasPolarityError/>
+        <PolarityError/>
+      </Sequence>
+      <Sequence>
+        <PolarityCircuitError/>
+        <HasPolarityCircuitError/>
+      </Sequence>
+      <Sequence>
+        <HasOverflowError/>
+        <OverflowError/>
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Self Check">
+    <Sequence name="SelfCheck">
+      <EnterSelfCheck/>
+      <Self_check/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Smart Charger">
+    <Sequence>
+      <SubTree ID="General Errors"
+               _autoremap="false"/>
+      <SubTree ID="Calibration"
+               _autoremap="false"/>
+      <SubTree ID="Self Check"
+               _autoremap="false"/>
+      <SubTree ID="Charger"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="Absorption"
+            editable="true"/>
+    <Action ID="Absorption2"
+            editable="true"/>
+    <Action ID="Bulk"
+            editable="true"/>
+    <Action ID="CalibrateCurrent"
+            editable="true"/>
+    <Action ID="CalibrateVoltage"
+            editable="true"/>
+    <Action ID="CurrentError"
+            editable="true"/>
+    <Condition ID="EnterCalibration"
+               editable="true"/>
+    <Condition ID="EnterSelfCheck"
+               editable="true"/>
+    <Action ID="FanError"
+            editable="true"/>
+    <Action ID="Floating"
+            editable="true"/>
+    <Condition ID="HasCurrentError"
+               editable="true"/>
+    <Condition ID="HasFanError"
+               editable="true"/>
+    <Condition ID="HasMinimumCurrent"
+               editable="true">
+      <input_port name="current"/>
+    </Condition>
+    <Condition ID="HasMinimumVoltage"
+               editable="true">
+      <input_port name="voltage"/>
+    </Condition>
+    <Condition ID="HasOvercurrentError"
+               editable="true"/>
+    <Condition ID="HasOverflowError"
+               editable="true"/>
+    <Condition ID="HasOvervoltageError"
+               editable="true"/>
+    <Condition ID="HasPolarityCircuitError"
+               editable="true"/>
+    <Condition ID="HasPolarityError"
+               editable="true"/>
+    <Condition ID="HasVoltageError"
+               editable="true"/>
+    <Condition ID="MissingCalibrationData"
+               editable="true"/>
+    <Action ID="MissingCalibrationDataError"
+            editable="true"/>
+    <Action ID="OvercurrentError"
+            editable="true"/>
+    <Action ID="OverflowError"
+            editable="true"/>
+    <Action ID="OvervoltageError"
+            editable="true"/>
+    <Action ID="PolarityCircuitError"
+            editable="true"/>
+    <Action ID="PolarityError"
+            editable="true"/>
+    <Action ID="Self_check"
+            editable="true"/>
+    <Decorator ID="TimeoutInHours"
+               editable="true">
+      <input_port name="hours"/>
+    </Decorator>
+    <Action ID="Trickle"
+            editable="true"/>
+    <Action ID="Unplugged"
+            editable="true"/>
+    <Action ID="VoltageError"
+            editable="true"/>
+  </TreeNodesModel>
+
+</root>

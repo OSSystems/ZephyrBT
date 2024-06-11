@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="Smart Charger">
+  <BehaviorTree ID="Calibration">
+    <Sequence>
+      <EnterCalibration _description="Check condition to enter CALIBRATION mode&#10;&#10;if calibration_GPIO == TRUE&#10;   return SUCCESS&#10;else&#10;   resturn FAILURE"/>
+      <Fallback>
+        <VoltageError _description="Check for voltage calibration error&#10;&#10;if voltage_calibration_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+        <CurrentError _description="Check for current calibration error&#10;&#10;if current_calibration_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+        <Sequence>
+          <RunOnce then_skip="true">
+            <CalibrateVoltage _description="Read charger voltage and calculate the voltage correction factor.&#10;&#10;if (27498 mV &lt;= voltage &lt;= 27502 mV)&#10;   return SUCCESS&#10;else&#10;   return RUNNING"/>
+          </RunOnce>
+          <RunOnce then_skip="true">
+            <CalibrateCurrent _description="Read charger current and calculate the current correction factor.&#10;&#10;if current == MAX_CURRENT&#10;   return SUCCESS&#10;else&#10;   return RUNNING"/>
+          </RunOnce>
+        </Sequence>
+      </Fallback>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Charger">
+    <Fallback>
+      <MissingCalibrationDataError _description="Load calibration data and check if the values are correct&#10;&#10;if calibration_data_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      <Unplugged _description="Status where no battery is connected to the charger&#10;&#10;if current &lt;= 0.01&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      <Fallback>
+        <TimeoutInHours hours="12">
+          <Trickle _description="Performs a slow charge with 1/3 of the nominal current until the battery voltage reaches the minimum required&#10;&#10;if (voltage &lt; 18)&#10;   return SUCCESS&#10;else&#10;   return FAILURE&#10;"/>
+        </TimeoutInHours>
+        <OverflowError _description="Check for overflow error&#10;&#10;if overflow_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      </Fallback>
+      <Fallback>
+        <TimeoutInHours hours="12">
+          <Bulk _description="Applies the nominal current until the voltage reaches the threshold for transitioning to the next state&#10;&#10;if (voltage &lt; 28.6V)&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+        </TimeoutInHours>
+        <OverflowError _description="Check for overflow error&#10;&#10;if overflow_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      </Fallback>
+      <Fallback>
+        <TimeoutInHours hours="12">
+          <Absorption _description="Keep monitoring the decreasing current while keeping the voltage constant (the battery is 80% charged at this state).&#10;&#10;if (current &gt; CURRENT_ABSORPTION2)&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+        </TimeoutInHours>
+        <OverflowError _description="Check for overflow error&#10;&#10;if overflow_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      </Fallback>
+      <Fallback>
+        <TimeoutInHours hours="12">
+          <Absorption2 _description="Keep monitoring the decreasing current until if falls below 28% of the nominal current.&#10;&#10;if (current &gt; CURRENT_FLOATING)&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+        </TimeoutInHours>
+        <OverflowError _description="Check for overflow error&#10;&#10;if overflow_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      </Fallback>
+      <Floating _description="Apply a constant current until the battery reaches 100% capacity&#10;&#10;return SUCCESS"/>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="General Errors">
+    <Fallback>
+      <OverflowError _description="Detection and treatment of the 12h overflow error&#10;&#10;if overflow_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      <FanError _description="Detection and treatment of the fan error&#10;&#10;if fan_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      <OvervoltageError _description="Detection and treatment of the overvoltage error&#10;&#10;if overvoltage_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      <OvercurrentError _description="Detection and treatment of the overcurrent error&#10;&#10;if overcurrent_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      <PolarityError _description="Detection and treatment of the polarity error&#10;&#10;if polarity_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+      <PolarityCircuitError _description="Detection and treatment of the polarity circuit error&#10;&#10;if polarity_circtuit_error == TRUE&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+    </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Self Check">
+    <Self_check _description="Check the relay status.&#10;&#10;if relay_error&#10;   return SUCCESS&#10;else&#10;   return FAILURE"/>
+  </BehaviorTree>
+
+  <BehaviorTree ID="Smart Charger">
+    <Fallback>
+      <SubTree ID="General Errors"
+               _autoremap="false"/>
+      <SubTree ID="Calibration"
+               _autoremap="false"/>
+      <SubTree ID="Self Check"/>
+      <SubTree ID="Charger"/>
+    </Fallback>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="Absorption"
+            editable="true"/>
+    <Action ID="Absorption2"
+            editable="true"/>
+    <Action ID="Bulk"
+            editable="true"/>
+    <Action ID="CalibrateCurrent"
+            editable="true"/>
+    <Action ID="CalibrateVoltage"
+            editable="true"/>
+    <Action ID="CurrentError"
+            editable="true"/>
+    <Condition ID="EnterCalibration"
+               editable="true"/>
+    <Action ID="FanError"
+            editable="true"/>
+    <Action ID="Floating"
+            editable="true"/>
+    <Action ID="MissingCalibrationDataError"
+            editable="true"/>
+    <Action ID="OvercurrentError"
+            editable="true"/>
+    <Action ID="OverflowError"
+            editable="true"/>
+    <Action ID="OvervoltageError"
+            editable="true"/>
+    <Action ID="PolarityCircuitError"
+            editable="true"/>
+    <Action ID="PolarityError"
+            editable="true"/>
+    <Action ID="Self_check"
+            editable="true"/>
+    <Decorator ID="TimeoutInHours"
+               editable="true">
+      <input_port name="hours"/>
+    </Decorator>
+    <Action ID="Trickle"
+            editable="true"/>
+    <Action ID="Unplugged"
+            editable="true"/>
+    <Action ID="VoltageError"
+            editable="true"/>
+  </TreeNodesModel>
+
+</root>

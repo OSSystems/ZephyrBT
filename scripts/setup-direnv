@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Copyright (c) 2022-2024 OS Systems
+# Copyright (c) 2024 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+# Ensure the environment has the required packages and prepare 'direnv' for execution.
+
+die() {
+	echo "ERROR: $@"
+	exit 1
+}
+
+type direnv &>/dev/null || die "direnv is not available, aborting..."
+type nix &>/dev/null || die "nix is not available, aborting..."
+
+basedir=$(basename $(dirname $(dirname $(readlink -f $0))))
+workspace_dir=$(dirname $(readlink -f $0))/../../
+
+cat >$workspace_dir/.envrc <<EOF
+if ! has nix_direnv_version || ! nix_direnv_version 2.3.0; then
+  source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/2.3.0/direnvrc" "sha256-Dmd+j63L84wuzgyjITIfSxSD57Tx7v51DMxVZOsiUD8="
+fi
+
+# Ensure the direnv script is up to date
+if [ "$(sha256sum $basedir/scripts/setup-direnv)" != "\$(sha256sum $basedir/scripts/setup-direnv)" ]; then
+  ./$basedir/scripts/setup-direnv # re-execute
+fi
+
+nix_direnv_watch_file \$(find . -name "*.nix" -printf '"%p" ')
+use flake $basedir/
+EOF
+
+direnv allow

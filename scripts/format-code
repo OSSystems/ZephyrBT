@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Copyright (c) 2022-2024 OS Systems
+# Copyright (c) 2024 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+# Automatically run clang-format on the source code. This script must be run from the root directory
+# of the code repository.
+
+set -e
+
+basedir=$(dirname $(dirname $(readlink -f $0)))
+
+cd $basedir
+find -type f -'(' -name "*.c" -o -name "*.h" -')' \
+	-not -path "./build/*" \
+	-print0 \
+    | xargs -0 clang-format -style=file:.clang-format -i

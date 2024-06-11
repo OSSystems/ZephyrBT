@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Copyright (c) 2022-2024 OS Systems
+# Copyright (c) 2024 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+# Run tests for boards. This script must be run from the root directory of the code repository.
+
+basedir=$(dirname $(dirname $(readlink -f $0)))
+
+cd $basedir
+
+if [ -z $(find -'(' -name sample.yaml -o -name testcase.yaml -')' -a -print -quit) ]; then
+    echo "INFO: No test cases found"
+    exit 0
+fi
+
+../deps/zephyr/scripts/twister -G --testsuite-root . $@

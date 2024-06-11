@@ -1,0 +1,57 @@
+# Copyright (c) 2024 OS Systems
+# Copyright (c) 2024 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Minimal
+common:
+  tags: zephyrbt
+tests:
+  samples.zephyrbt.minimal:
+    platform_allow:
+      - native_posix/native/64
+      - nucleo_f767zi
+    harness: console
+    harness_config:
+      type: multi_line
+      regex:
+        - "D: tick"
+        - "D: A \\[control, 12\\]"
+        - "D: Deep: 1"
+        - "D: A \\[control, 12\\]"
+        - "D: B \\[control, 11\\]"
+        - "D: Deep: 2"
+        - "D: B \\[control, 11\\]"
+        - "D: F \\[control, 10\\]"
+        - "D: Deep: 3"
+        - "D: F \\[control, 10\\]"
+        - "D: I \\[action, 9\\]"
+        - "D: Deep: 4"
+        - "D: I \\[action, 9\\]"
+        - "D: J \\[action, 8\\]"
+        - "D: Deep: 4"
+        - "D: J \\[action, 8\\]"
+        - "D: K \\[action, 7\\]"
+        - "D: Deep: 4"
+        - "D: K \\[action, 7\\]"
+        - "D: G \\[action, 6\\]"
+        - "D: Deep: 3"
+        - "D: G \\[action, 6\\]"
+        - "D: C \\[action, 5\\]"
+        - "D: Deep: 2"
+        - "D: C \\[action, 5\\]"
+        - "D: D \\[control, 4\\]"
+        - "D: Deep: 2"
+        - "D: D \\[control, 4\\]"
+        - "D: H \\[control, 3\\]"
+        - "D: Deep: 3"
+        - "D: H \\[control, 3\\]"
+        - "D: L \\[action, 2\\]"
+        - "D: Deep: 4"
+        - "D: L \\[action, 2\\]"
+        - "D: M \\[action, 1\\]"
+        - "D: Deep: 4"
+        - "D: M \\[action, 1\\]"
+        - "D: E \\[action, 0\\]"
+        - "D: Deep: 2"
+        - "D: E \\[action, 0\\]"

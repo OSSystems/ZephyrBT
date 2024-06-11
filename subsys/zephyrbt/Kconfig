@@ -1,0 +1,52 @@
+# Copyright (c) 2024 OS Systems
+# Copyright (c) 2024 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+config ZEPHYR_BEHAVIOUR_TREE
+	bool "Behaviour Tree"
+
+if ZEPHYR_BEHAVIOUR_TREE
+
+config ZEPHYR_BEHAVIOUR_TREE_INIT_PRIORITY
+	int "Behaviour Initialization Priority"
+	range 0 99
+	default 60
+
+config ZEPHYR_BEHAVIOUR_TREE_NODE_INFO
+	bool "Include the node information"
+	help
+	  The node information is only relevant for debug purposes and should
+	  not be available when in release mode.
+
+config ZEPHYR_BEHAVIOUR_TREE_USER_DATA
+	bool "Include a field to allow user add custom data on the tree"
+	help
+	  The node information is only relevant for debug purposes and should
+	  not be available when in release mode.
+
+config ZEPHYR_BEHAVIOUR_TREE_DYNAMIC
+	bool "Enable dynamic behaviour"
+	depends on DYNAMIC_THREAD
+	depends on KERNEL_MEM_POOL
+	help
+	  Enable use of dynamic memory.
+
+config ZEPHYR_BEHAVIOUR_TREE_NODE_INIT
+	bool "Generate node initialization function"
+	depends on ZEPHYR_BEHAVIOUR_TREE_DYNAMIC
+	help
+	  The node initialization function must be defined and will be called
+	  at behaviour tree thread initialization.
+
+config ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
+	bool "Generate node context storage"
+	depends on ZEPHYR_BEHAVIOUR_TREE_NODE_INIT
+	help
+	  The node context storage functions are available to user when the
+	  node initialization is available.
+
+module = ZEPHYR_BEHAVIOUR_TREE
+module-str = Behaviour Tree
+source "subsys/logging/Kconfig.template.log_config"
+
+endif

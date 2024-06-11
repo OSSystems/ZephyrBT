@@ -1,0 +1,33 @@
+{
+	"configurations": [
+	{
+		"name": "GDB Debug Launch",
+		"type": "cppdbg",
+		"request": "launch",
+		"program": "${workspaceFolder}/build/zephyr/zephyr.exe",
+		"args": [],
+		"stopAtEntry": false,
+		"cwd": "${workspaceFolder}/@app_folder@",
+		"environment": [],
+		"externalConsole": false,
+		"launchCompleteCommand": "exec-run",
+		"linux": {
+		  "MIMode": "gdb",
+		  "miDebuggerPath": "/usr/bin/gdb"
+		},
+		"setupCommands": [
+		    {
+			"description": "Enable pretty-printing for gdb",
+			"text": "-enable-pretty-printing",
+			"ignoreFailures": true
+		    },
+		    {
+			"description": "Set Disassembly Flavor to Intel",
+			"text": "-gdb-set disassembly-flavor intel",
+			"ignoreFailures": true
+		    }
+		],
+		"preLaunchTask": "buildZephyrNative"
+	}
+	]
+}
