@@ -22,7 +22,7 @@ if ! has nix_direnv_version || ! nix_direnv_version 2.3.0; then
 fi
 
 # Ensure the direnv script is up to date
-if [ "$(sha256sum $basedir/scripts/setup-direnv)" != "\$(sha256sum $basedir/scripts/setup-direnv)" ]; then
+if [ "$(sha256sum $0 | cut -f 1 -d' ')" != "\$(sha256sum $basedir/scripts/setup-direnv | cut -f 1 -d' ')" ]; then
   ./$basedir/scripts/setup-direnv # re-execute
 fi
 
