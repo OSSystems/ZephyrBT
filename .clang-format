@@ -1,5 +1,3 @@
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 #
 # Note: The list of ForEachMacros can be obtained using:
@@ -34,6 +32,8 @@ ColumnLimit: 100
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
 ForEachMacros:
+  - 'ARRAY_FOR_EACH'
+  - 'ARRAY_FOR_EACH_PTR'
   - 'FOR_EACH'
   - 'FOR_EACH_FIXED_ARG'
   - 'FOR_EACH_IDX'
@@ -92,62 +92,3 @@ UseTab: ForContinuationAndIndentation
 WhitespaceSensitiveMacros:
   - STRINGIFY
   - Z_STRINGIFY
-# Freedom
-AlignConsecutiveDeclarations: None
-AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
-BracedInitializerIndentWidth: 4
-BreakArrays: false
-BreakBeforeBinaryOperators: All
-BreakBeforeConceptDeclarations: Always
-BreakBeforeInlineASMColon: Always
-BreakBeforeTernaryOperators: True
-BreakConstructorInitializers: BeforeComma
-BreakInheritanceList: BeforeComma
-BreakStringLiterals: true
-BinPackArguments: true
-BinPackParameters: true
-CompactNamespaces: false
-EmptyLineAfterAccessModifier: Always
-EmptyLineBeforeAccessModifier: Always
-FixNamespaceComments: true
-IndentCaseBlocks: false
-IndentExternBlock: AfterExternBlock
-# BraceWrapping.AfterExternBlock: true
-IndentGotoLabels: false
-IndentPPDirectives: AfterHash
-IndentRequiresClause: false
-InsertNewlineAtEOF: true
-InsertTrailingCommas: None
-KeepEmptyLinesAtTheStartOfBlocks: false
-LineEnding: LF
-ReferenceAlignment: Right
-ReflowComments: true
-RemoveBracesLLVM: false
-RemoveSemicolon: false
-RequiresClausePosition: OwnLine
-RequiresExpressionIndentation: OuterScope
-SeparateDefinitionBlocks: Always
-SpaceAfterCStyleCast: true
-SpaceAfterLogicalNot: false
-SpaceAfterTemplateKeyword: false
-SpaceBeforeAssignmentOperators: true
-SpaceBeforeCaseColon: false
-SpaceBeforeCpp11BracedList: false
-SpaceBeforeSquareBrackets: false
-SpaceInEmptyBlock: true
-SpacesInLineCommentPrefix:
-  Minimum: 1
-  Maximum: -1
-TabWidth: 8
-PointerAlignment: Right
-PPIndentWidth: 1
-AlignEscapedNewlines: Right
-AlignOperands: AlignAfterOperator
-MaxEmptyLinesToKeep: 2
-AlignTrailingComments:
-  Kind: Always
-  OverEmptyLines: 2
-AllowAllArgumentsOnNextLine: false
-AllowAllParametersOfDeclarationOnNextLine: false
-AlignAfterOpenBracket: Align
-AlignArrayOfStructures: Left

@@ -28,7 +28,7 @@ enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_cont
 
 	struct zephyrbt_decorator_run_once_context *run_once;
 
-	run_once  = k_malloc(sizeof(struct zephyrbt_decorator_run_once_context));
+	run_once = k_malloc(sizeof(struct zephyrbt_decorator_run_once_context));
 	self->ctx = run_once;
 
 	if (run_once == NULL) {
@@ -37,8 +37,8 @@ enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_cont
 
 	memset(run_once, 0, sizeof(struct zephyrbt_decorator_run_once_context));
 
-	run_once->then_skip = zephyrbt_search_blackboard(ctx, self->index,
-							 ZEPHYRBT_RUN_ONCE_ATTRIBUTE_THEN_SKIP);
+	run_once->then_skip =
+		zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_RUN_ONCE_ATTRIBUTE_THEN_SKIP);
 
 	if (run_once->then_skip == NULL) {
 		LOG_DBG("Invalid then_skip value.");
@@ -58,14 +58,14 @@ enum zephyrbt_child_status zephyrbt_decorator_run_once(struct zephyrbt_context *
 #endif
 
 	struct zephyrbt_decorator_run_once_context *run_once;
-	run_once = (struct zephyrbt_decorator_run_once_context *) self->ctx;
+	run_once = (struct zephyrbt_decorator_run_once_context *)self->ctx;
 
 	if (run_once->state == ZEPHYRBT_DECORATOR_RUN_ONCE_STATE_FINISHED) {
 		return ZEPHYRBT_CHILD_SKIP_STATUS;
 	}
 
-	enum zephyrbt_child_status status
-		= zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
+	enum zephyrbt_child_status status =
+		zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
 
 	if (status == ZEPHYRBT_CHILD_RUNNING_STATUS) {
 		return ZEPHYRBT_CHILD_RUNNING_STATUS;
