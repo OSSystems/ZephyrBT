@@ -17,8 +17,8 @@ enum zephyrbt_child_status zephyrbt_decorator_inverter(struct zephyrbt_context *
 	LOG_DBG("%s", self->name);
 #endif
 
-	enum zephyrbt_child_status status
-		= zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
+	enum zephyrbt_child_status status =
+		zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
 
 	if (status == ZEPHYRBT_CHILD_RUNNING_STATUS || status == ZEPHYRBT_CHILD_SKIP_STATUS) {
 		return status;

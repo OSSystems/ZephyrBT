@@ -76,7 +76,7 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_DYNAMIC)
 void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 {
-	struct zephyrbt_context *ctx = (struct zephyrbt_context *) zephyrbt_ctx;
+	struct zephyrbt_context *ctx = (struct zephyrbt_context *)zephyrbt_ctx;
 	if (ctx == NULL) {
 		LOG_ERR("The behavior tree context is invalid. Thread aborted!");
 		return;
@@ -88,7 +88,7 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 	}
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INIT)
-	int i                      = 0;
+	int i = 0;
 	struct zephyrbt_node *root = zephyrbt_get_root(ctx);
 	struct zephyrbt_node *self = zephyrbt_get_node(ctx, i);
 
@@ -128,8 +128,7 @@ static int zephyrbt_init(void)
 		}
 
 		ctx->tid = k_thread_create(&ctx->thread, ctx->stack, ctx->stack_size,
-					   zephyrbt_thread_func, ctx, NULL, NULL,
-					   ctx->thread_prio,
+					   zephyrbt_thread_func, ctx, NULL, NULL, ctx->thread_prio,
 					   K_INHERIT_PERMS, K_NO_WAIT);
 
 		if (ctx->tid == NULL) {

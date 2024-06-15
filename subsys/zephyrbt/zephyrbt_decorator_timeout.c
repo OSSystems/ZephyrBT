@@ -31,7 +31,7 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_conte
 
 	struct zephyrbt_decorator_timeout_context *timeout;
 
-	timeout   = k_malloc(sizeof(struct zephyrbt_decorator_timeout_context));
+	timeout = k_malloc(sizeof(struct zephyrbt_decorator_timeout_context));
 	self->ctx = timeout;
 
 	if (timeout == NULL) {
@@ -42,8 +42,8 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_conte
 
 	k_timer_init(&timeout->timer, NULL, NULL);
 
-	timeout->msec
-		= zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_TIMEOUT_ATTRIBUTE_MSEC);
+	timeout->msec =
+		zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_TIMEOUT_ATTRIBUTE_MSEC);
 
 	if (timeout->msec == NULL) {
 		LOG_DBG("Invalid timeout msec value.");
@@ -61,7 +61,7 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
 #endif
 
 	struct zephyrbt_decorator_timeout_context *timeout;
-	timeout = (struct zephyrbt_decorator_timeout_context *) self->ctx;
+	timeout = (struct zephyrbt_decorator_timeout_context *)self->ctx;
 
 	if (timeout == NULL) {
 		LOG_DBG("Undefined behaviour on zephyrbt_decorator_timeout.");
@@ -69,13 +69,13 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
 	}
 
 	if (timeout->state == ZEPHYRBT_DECORATOR_TIMEOUT_STATE_IDLE) {
-		k_timer_start(&timeout->timer, K_MSEC((uintptr_t) timeout->msec->item), K_NO_WAIT);
+		k_timer_start(&timeout->timer, K_MSEC((uintptr_t)timeout->msec->item), K_NO_WAIT);
 
 		timeout->state = ZEPHYRBT_DECORATOR_TIMEOUT_STATE_RUNNING;
 	}
 
-	enum zephyrbt_child_status status
-		= zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
+	enum zephyrbt_child_status status =
+		zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
 
 	if (timeout->state == ZEPHYRBT_DECORATOR_TIMEOUT_STATE_RUNNING) {
 		if (k_timer_status_get(&timeout->timer) > 0) {

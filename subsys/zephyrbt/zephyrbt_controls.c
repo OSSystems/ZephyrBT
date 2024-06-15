@@ -35,7 +35,7 @@ enum zephyrbt_child_status zephyrbt_control_sequence(struct zephyrbt_context *ct
 	LOG_DBG("%s", self->name);
 #endif
 
-	struct zephyrbt_node *siblings    = zephyrbt_get_node(ctx, self->child);
+	struct zephyrbt_node *siblings = zephyrbt_get_node(ctx, self->child);
 	enum zephyrbt_child_status status = ZEPHYRBT_CHILD_FAILURE_STATUS;
 
 	while (siblings) {
@@ -83,7 +83,7 @@ enum zephyrbt_child_status zephyrbt_control_fallback(struct zephyrbt_context *ct
 	LOG_DBG("%s", self->name);
 #endif
 
-	struct zephyrbt_node *siblings    = zephyrbt_get_node(ctx, self->child);
+	struct zephyrbt_node *siblings = zephyrbt_get_node(ctx, self->child);
 	enum zephyrbt_child_status status = ZEPHYRBT_CHILD_FAILURE_STATUS;
 
 	while (siblings) {
@@ -109,9 +109,9 @@ enum zephyrbt_child_status zephyrbt_control_fallback(struct zephyrbt_context *ct
 enum zephyrbt_child_status zephyrbt_control_parallel_init(struct zephyrbt_context *ctx,
 							  struct zephyrbt_node *self)
 {
-# if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
-# endif
+#endif
 
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
@@ -119,9 +119,9 @@ enum zephyrbt_child_status zephyrbt_control_parallel_init(struct zephyrbt_contex
 enum zephyrbt_child_status zephyrbt_control_parallel(struct zephyrbt_context *ctx,
 						     struct zephyrbt_node *self)
 {
-# if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
-# endif
+#endif
 
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
