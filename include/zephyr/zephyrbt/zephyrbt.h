@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 OS Systems
+ * Copyright (c) 2024 O.S. Systems Software LTDA.
  * Copyright (c) 2024 Freedom Veiculos Eletricos
  *
  * SPDX-License-Identifier: UNLICENSED
