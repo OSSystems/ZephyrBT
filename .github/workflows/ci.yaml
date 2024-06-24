@@ -42,7 +42,7 @@ jobs:
       - run: nix build -L ".#${{ matrix.attr }}" --keep-going
 
       - name: Twister Tests
-        uses: workflow/nix-shell-action@v3.3.0
+        uses: workflow/nix-shell-action@v3.3.2
         id: twister-tests
         with:
           flakes-from-devshell: true
