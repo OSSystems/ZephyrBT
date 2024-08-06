@@ -22,6 +22,12 @@ struct zephyrbt_decorator_timeout_context {
 	struct zephyrbt_blackboard_item *msec;
 };
 
+static void zephyrbt_decorator_timeout_callback(struct k_timer *tick_tmr)
+{
+	struct zephyrbt_decorator_timeout_context *timeout = k_timer_user_data_get(tick_tmr);
+	timeout->state = ZEPHYRBT_DECORATOR_TIMEOUT_STATE_TIMEOUT;
+}
+
 enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_context *ctx,
 							   struct zephyrbt_node *self)
 {
@@ -40,7 +46,8 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_conte
 
 	memset(timeout, 0, sizeof(struct zephyrbt_decorator_timeout_context));
 
-	k_timer_init(&timeout->timer, NULL, NULL);
+	k_timer_init(&timeout->timer, zephyrbt_decorator_timeout_callback, NULL);
+	k_timer_user_data_set(&timeout->timer, timeout);
 
 	timeout->msec =
 		zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_TIMEOUT_ATTRIBUTE_MSEC);
@@ -77,13 +84,10 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
 	enum zephyrbt_child_status status =
 		zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
 
-	if (timeout->state == ZEPHYRBT_DECORATOR_TIMEOUT_STATE_RUNNING) {
-		if (k_timer_status_get(&timeout->timer) > 0) {
-			k_timer_stop(&timeout->timer);
-			timeout->state = ZEPHYRBT_DECORATOR_TIMEOUT_STATE_IDLE;
+	if (timeout->state == ZEPHYRBT_DECORATOR_TIMEOUT_STATE_TIMEOUT) {
+		timeout->state = ZEPHYRBT_DECORATOR_TIMEOUT_STATE_IDLE;
 
-			return ZEPHYRBT_CHILD_FAILURE_STATUS;
-		}
+		return ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 
 	if (status != ZEPHYRBT_CHILD_RUNNING_STATUS) {
