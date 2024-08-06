@@ -23,7 +23,7 @@ enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_cont
 							    struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
-	LOG_DBG("%s", self->name);
+	LOG_DBG("init: %s", self->name);
 #endif
 
 	struct zephyrbt_decorator_run_once_context *run_once;

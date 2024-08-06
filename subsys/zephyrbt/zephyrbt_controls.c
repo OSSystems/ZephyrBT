@@ -110,7 +110,7 @@ enum zephyrbt_child_status zephyrbt_control_parallel_init(struct zephyrbt_contex
 							  struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
-	LOG_DBG("%s", self->name);
+	LOG_DBG("init: %s", self->name);
 #endif
 
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
