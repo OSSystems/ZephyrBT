@@ -431,6 +431,7 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
     parallel = [['failure_count', 'input_port', '1', 'number of children which need to fail to trigger a FAILURE'],
                 ['success_count', 'input_port', '-1', 'number of children which need to succeed to trigger a SUCCESS']
                ]
+    delay =    [['delay_msec', 'input_port', None, 'Tick the child after a few milliseconds']]
     repeat =   [['num_cycles', 'input_port', None, 'Repeat a successful child up to N times. Use -1 to create an infinite loop']]
     timeout =  [['msec', 'input_port', None, 'After a certain amount of time, halt() the child if it is still running']]
     runonce =  [['then_skip', 'input_port', True, 'If true, skip after the first execution, otherwise return the same NodeStatus returned once by the child']]
@@ -442,6 +443,7 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
                ('sequence',       'control',   False, []),
                ('parallel',       'control',   True,  parallel),
                ('inverter',       'decorator', False, []),
+               ('delay',          'decorator', True,  delay),
                ('repeat',         'decorator', True,  repeat),
                ('run_once',       'decorator', True,  runonce),
                ('timeout',        'decorator', True,  timeout),

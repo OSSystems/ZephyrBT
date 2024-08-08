@@ -46,7 +46,7 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 						    struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
-	LOG_DBG("%s", self->name);
+	LOG_DBG("eval %s", self->name);
 #endif
 
 	if (self == NULL) {
@@ -92,13 +92,16 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 	struct zephyrbt_node *root = zephyrbt_get_root(ctx);
 	struct zephyrbt_node *self = zephyrbt_get_node(ctx, i);
 
-	while (self != NULL && self != root) {
+	while (self != NULL) {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT)
 		self->ctx = NULL;
 #endif
-
 		if (self->init != NULL) {
 			self->init(ctx, self);
+		}
+
+		if (self == root) {
+			break;
 		}
 
 		self = zephyrbt_get_node(ctx, ++i);
@@ -108,7 +111,6 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 	while (true) {
 		LOG_DBG("tick");
 		zephyrbt_evaluate(ctx, zephyrbt_get_root(ctx));
-		k_sleep(K_MSEC(1000));
 	}
 }
 

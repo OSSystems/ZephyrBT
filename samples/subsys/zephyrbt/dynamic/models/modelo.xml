@@ -2,35 +2,37 @@
 <root BTCPP_format="4"
       main_tree_to_execute="Modelo">
   <BehaviorTree ID="Modelo">
-    <Fallback>
-      <Sequence>
-        <Fallback>
-          <BallFound GPIO0=""/>
-          <FindBall GPIO1="0"
-                    IN=""
-                    OUT=""/>
-        </Fallback>
-        <Fallback>
-          <BallClose/>
-          <ApprochBall/>
-        </Fallback>
-        <Fallback>
-          <BallGrasped/>
-          <GraspBall/>
-        </Fallback>
-        <Fallback>
-          <BinClose/>
-          <ApprochBin/>
-        </Fallback>
-        <Fallback>
-          <BallPlaced/>
-          <PlaceBall/>
-        </Fallback>
-      </Sequence>
-      <Timeout msec="1250">
-        <AskForHelp/>
-      </Timeout>
-    </Fallback>
+    <Delay delay_msec="1000">
+      <Fallback>
+        <Sequence>
+          <Fallback>
+            <BallFound GPIO0=""/>
+            <FindBall GPIO1="0"
+                      IN=""
+                      OUT=""/>
+          </Fallback>
+          <Fallback>
+            <BallClose/>
+            <ApprochBall/>
+          </Fallback>
+          <Fallback>
+            <BallGrasped/>
+            <GraspBall/>
+          </Fallback>
+          <Fallback>
+            <BinClose/>
+            <ApprochBin/>
+          </Fallback>
+          <Fallback>
+            <BallPlaced/>
+            <PlaceBall/>
+          </Fallback>
+        </Sequence>
+        <Timeout msec="1250">
+          <AskForHelp/>
+        </Timeout>
+      </Fallback>
+    </Delay>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->

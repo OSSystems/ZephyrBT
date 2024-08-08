@@ -25,8 +25,6 @@ zephyrbt_define_from_behaviourtreecpp_xml(app
 	0
 )
 
-if(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT)
-
 zephyrbt_define_from_behaviourtreecpp_xml(app
 	models/modelo.xml
 	${CMAKE_BINARY_DIR}/include
@@ -34,5 +32,3 @@ zephyrbt_define_from_behaviourtreecpp_xml(app
 	1024
 	0
 )
-
-endif()

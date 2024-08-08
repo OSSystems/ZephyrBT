@@ -159,6 +159,15 @@ enum zephyrbt_child_status zephyrbt_decorator_repeat(struct zephyrbt_context *ct
 enum zephyrbt_child_status zephyrbt_decorator_repeat_init(struct zephyrbt_context *ctx,
 							  struct zephyrbt_node *self);
 
+enum zephyrbt_delay_attributes {
+	ZEPHYRBT_DELAY_ATTRIBUTE_DELAY_MSEC,
+};
+
+enum zephyrbt_child_status zephyrbt_decorator_delay(struct zephyrbt_context *ctx,
+						    struct zephyrbt_node *self);
+enum zephyrbt_child_status zephyrbt_decorator_delay_init(struct zephyrbt_context *ctx,
+							 struct zephyrbt_node *self);
+
 enum zephyrbt_run_once_attributes {
 	ZEPHYRBT_RUN_ONCE_ATTRIBUTE_THEN_SKIP,
 };
