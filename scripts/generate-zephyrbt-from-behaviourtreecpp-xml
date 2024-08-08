@@ -428,6 +428,8 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
          stack, prio, user_file) -> None:
     zephyrbt = Path(zephyrbt_filename).stem
 
+    sleep =    [['msec', 'input_port', None, 'Wait the amount of milliseconds']]
+
     parallel = [['failure_count', 'input_port', '1', 'number of children which need to fail to trigger a FAILURE'],
                 ['success_count', 'input_port', '-1', 'number of children which need to succeed to trigger a SUCCESS']
                ]
@@ -439,6 +441,7 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
     #                  node_name,     type, has_init, blackboard_attributes
     builtin = [('always_success', 'action',    False, []),
                ('always_failure', 'action',    False, []),
+               ('sleep',          'action',    True,  sleep),
                ('fallback',       'control',   False, []),
                ('sequence',       'control',   False, []),
                ('parallel',       'control',   True,  parallel),

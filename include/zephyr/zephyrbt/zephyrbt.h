@@ -131,6 +131,13 @@ enum zephyrbt_child_status zephyrbt_action_always_success(struct zephyrbt_contex
 							  struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_action_always_failure(struct zephyrbt_context *ctx,
 							  struct zephyrbt_node *self);
+enum zephyrbt_sleep_attributes {
+	ZEPHYRBT_SLEEP_ATTRIBUTE_MSEC,
+};
+enum zephyrbt_child_status zephyrbt_action_sleep(struct zephyrbt_context *ctx,
+						 struct zephyrbt_node *self);
+enum zephyrbt_child_status zephyrbt_action_sleep_init(struct zephyrbt_context *ctx,
+						      struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_control_fallback(struct zephyrbt_context *ctx,
 						     struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_control_sequence(struct zephyrbt_context *ctx,
