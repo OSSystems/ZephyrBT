@@ -32,6 +32,7 @@ enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_cont
 	self->ctx = run_once;
 
 	if (run_once == NULL) {
+		LOG_ERR("Context can not be allocate.");
 		return ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 

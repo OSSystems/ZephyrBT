@@ -41,6 +41,7 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_conte
 	self->ctx = timeout;
 
 	if (timeout == NULL) {
+		LOG_ERR("Context can not be allocate.");
 		return ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 
@@ -53,7 +54,7 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_conte
 		zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_TIMEOUT_ATTRIBUTE_MSEC);
 
 	if (timeout->msec == NULL) {
-		LOG_DBG("Invalid timeout msec value.");
+		LOG_ERR("Invalid timeout msec value.");
 		return ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 
@@ -71,7 +72,7 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
 	timeout = (struct zephyrbt_decorator_timeout_context *)self->ctx;
 
 	if (timeout == NULL) {
-		LOG_DBG("Undefined behaviour on zephyrbt_decorator_timeout.");
+		LOG_ERR("Undefined behaviour on zephyrbt_decorator_timeout.");
 		return ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 
@@ -85,6 +86,8 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
 		zephyrbt_evaluate(ctx, zephyrbt_get_node(ctx, self->child));
 
 	if (timeout->state == ZEPHYRBT_DECORATOR_TIMEOUT_STATE_TIMEOUT) {
+		LOG_DBG("Timeout");
+
 		timeout->state = ZEPHYRBT_DECORATOR_TIMEOUT_STATE_IDLE;
 
 		return ZEPHYRBT_CHILD_FAILURE_STATUS;

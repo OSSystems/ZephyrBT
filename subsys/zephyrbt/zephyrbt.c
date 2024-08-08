@@ -50,12 +50,12 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 #endif
 
 	if (self == NULL) {
-		LOG_DBG("Self can not be NULL");
+		LOG_ERR("Self can not be NULL");
 		return ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 
 	if (self->function == NULL) {
-		LOG_DBG("Function on index %d is NULL", self->index);
+		LOG_ERR("Function on index %d is NULL", self->index);
 		return ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 
