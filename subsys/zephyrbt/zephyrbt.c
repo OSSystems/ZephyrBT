@@ -88,23 +88,28 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 	}
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INIT)
-	int i = 0;
-	struct zephyrbt_node *root = zephyrbt_get_root(ctx);
-	struct zephyrbt_node *self = zephyrbt_get_node(ctx, i);
+	/*
+	 * Initialization must be in the reverse order to ensure that
+	 * dependencies will be initialized first. This allow a global
+	 * context to be initialized at root or as close as root possible.
+	 */
+	for (int i = ctx->nodes - 1; i >= 0; --i) {
+		struct zephyrbt_node *self = zephyrbt_get_node(ctx, i);
 
-	while (self != NULL) {
+		if (self == NULL) {
+			LOG_ERR("Node %d is invalid", i);
+			continue;
+		}
+
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT)
 		self->ctx = NULL;
 #endif
-		if (self->init != NULL) {
-			self->init(ctx, self);
+
+		if (self->init == NULL) {
+			continue;
 		}
 
-		if (self == root) {
-			break;
-		}
-
-		self = zephyrbt_get_node(ctx, ++i);
+		self->init(ctx, self);
 	}
 #endif
 
