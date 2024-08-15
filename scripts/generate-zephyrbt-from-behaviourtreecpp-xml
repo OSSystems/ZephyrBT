@@ -69,6 +69,8 @@ def get_blackboard_item(item):
         return "NULL"
     if item == '':
         return "NULL"
+    if item.startswith("{") and item.endswith("}"):
+        return "NULL"
     if item.isdigit():
         return f"(zephyrbt_node_context_t){item}"
 
@@ -80,6 +82,18 @@ def get_blackboard_item(item):
     except ValueError as ve:
         pass
     return f"(zephyrbt_node_context_t){item}"
+
+def get_blackboard_variable_index(item, blackboard):
+    if item == None:
+        return -1
+    if item == '':
+        return -1
+    if item.startswith("{") and item.endswith("}") and len(item) > 2:
+        value = item[1:-1]
+        for entry in blackboard:
+            if entry[1] == value:
+                return entry[0]
+    return -1
 
 def get_blackboard_type(btype):
     if btype == "input_port":
@@ -94,7 +108,7 @@ def write_zephyrbt_function_enum(f, function, attribs):
         return
 
     f.write(f"enum zephyrbt_{function}_attributes {{\n")
-    for _, name, *_ in attribs:
+    for _, _, name, *_ in attribs:
         f.write(f"\tZEPHYRBT_{function.upper()}_ATTRIBUTE_{name.upper()},\n")
     f.write(f"}};\n\n")
 
@@ -164,19 +178,29 @@ def write_zephyrbt_nodes_table(f, nodes, builtin, bt, name):
         f.write(f"\n\t}},")
     f.write(f"\n}};\n")
 
-def write_zephyrbt_blackboard_table(f, nodes, builtin, bt, name):
+def write_zephyrbt_blackboard_table(f, nodes, builtin, bt, blackboard, name):
     f.write(f"\nstatic struct zephyrbt_blackboard_item {name}[] = {{")
 
     for node in nodes:
         for entry in node[6]:
             f.write(f"\n\t{{")
-            if entry[4] is not None:
-                f.write(f"\n\t\t/* {entry[4]} */")
+            if entry[5] is not None:
+                f.write(f"\n\t\t/* {entry[5]} */")
             f.write(f"\n\t\t.idx = {node[1]},")
+            f.write(f"\n\t\t.ref = {get_blackboard_variable_index(entry[4], blackboard)},")
+            f.write(f"\n\t\t.key = ZEPHYRBT_{node[2].upper()}_ATTRIBUTE_{entry[2].upper()},")
+            f.write(f"\n\t\t.item = {get_blackboard_item(entry[4])},")
+            f.write(f"\n\t\t.type = {get_blackboard_type(entry[3])},")
+            f.write(f"\n\t}},")
+
+    for entry in blackboard:
+        if entry[0] >= len(nodes):
+            f.write(f"\n\t{{")
+            f.write(f"\n\t\t.idx = {entry[0]},")
             f.write(f"\n\t\t.ref = -1,")
-            f.write(f"\n\t\t.key = ZEPHYRBT_{node[2].upper()}_ATTRIBUTE_{entry[1].upper()},")
-            f.write(f"\n\t\t.item = {get_blackboard_item(entry[3])},")
-            f.write(f"\n\t\t.type = {get_blackboard_type(entry[2])},")
+            f.write(f"\n\t\t.key = ZEPHYRBT_BLACKBOARD_ITEM_ENTRY_KEY,")
+            f.write(f"\n\t\t.item = NULL,")
+            f.write(f"\n\t\t.type = ZEPHYRBT_BLACKBOARD_ITEM_INOUT_TYPE,")
             f.write(f"\n\t}},")
 
     f.write(f"\n\t{{")
@@ -190,7 +214,7 @@ def write_zephyrbt_blackboard_table(f, nodes, builtin, bt, name):
 
 
 def generate_files(filename, output_inc, output_data, output_stub, builtin,
-                   nodes, bt, stack, prio, user_file):
+                   nodes, bt, blackboard, stack, prio, user_file):
     with open(output_inc, "w") as f:
         f.write(HEADER)
         f.write(f"\n#ifndef {filename.upper()}_H")
@@ -209,7 +233,7 @@ def generate_files(filename, output_inc, output_data, output_stub, builtin,
         f.write(f"\nLOG_MODULE_REGISTER({filename}_data, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);\n")
         f.write(f"\n#include \"{filename}.h\"\n")
         write_zephyrbt_nodes_table(f, nodes, builtin, bt, node_data_name)
-        write_zephyrbt_blackboard_table(f, nodes, builtin, bt, node_blackboard_name)
+        write_zephyrbt_blackboard_table(f, nodes, builtin, bt, blackboard, node_blackboard_name)
         f.write(f"\nZEPHYRBT_DEFINE({filename}, {filename}_nodes, ")
         f.write(f"{stack}, {prio}, NULL, {filename}_blackboard);\n")
 
@@ -351,7 +375,9 @@ def parseBlackboardEntry(idx_nodes_set, blackboard_set, elem):
     for e in elem:
         name = e.attrib.get('name')
         default = e.attrib.get('default')
-        blackboard_set.append([node_index[2], name, e.tag, default, e.text])
+        if not node_index:
+            continue
+        blackboard_set.append([-1, node_index[2], name, e.tag, default, e.text])
 
 
 def addBuiltinBlackboard(idx_nodes_set, blackboard_set, builtin):
@@ -359,15 +385,41 @@ def addBuiltinBlackboard(idx_nodes_set, blackboard_set, builtin):
         node_index = getSearchNode(idx_nodes_set, node[0])
         if node_index:
             for port in node[3]:
-                blackboard_set.append([node_index[2], port[0], port[1], port[2], port[3]])
+                blackboard_set.append([-1, node_index[2], port[0], port[1], port[2], port[3]])
 
 
 def loadBlackboardEntries(node_type, blackboard_set):
     entries = []
     for entry in blackboard_set:
-        if entry[0] == node_type:
+        if entry[1] == node_type:
             entries.append(entry)
     return entries
+
+
+def loadBlackboardVariables(index, variable, blackboard_set):
+    if len(variable) <= 2:
+        return index
+
+    if variable.startswith("{") and variable.endswith("}"):
+        entry = variable[1:-1]
+        matches = [item for item in blackboard_set if item[1] == entry]
+        if not matches:
+            blackboard_set.append([index, entry, '', 'inout_port', '', ''])
+            index = index + 1
+
+    return index
+
+
+def addBlackboardVariables(idx_nodes_set, blackboard_set):
+    index = len(idx_nodes_set)
+
+    for node in blackboard_set:
+        index = loadBlackboardVariables(index, str(node[4]), blackboard_set)
+
+    for node in idx_nodes_set:
+        blackboard = node[6]
+        if blackboard:
+            index = loadBlackboardVariables(index, str(blackboard[0][1]), blackboard_set)
 
 
 def build_bt_set(builtin, root):
@@ -395,6 +447,8 @@ def build_bt_set(builtin, root):
         for e in elem:
             parseBlackboardEntry(idx_nodes_set, blackboard_set, e)
 
+    addBlackboardVariables(idx_nodes_set, blackboard_set)
+
     for node_idx in range(0, len(idx_nodes_set)):
         node = idx_nodes_set[node_idx]
         node_type = node[2]
@@ -407,13 +461,13 @@ def build_bt_set(builtin, root):
         for entry_idx in range(0, len(bb_entries)):
             entry = bb_entries[entry_idx]
             for name, value in attribs:
-                if entry[1] == name:
-                    entry[3] = value
+                if entry[2] == name:
+                    entry[4] = value
             bb_entries[entry_idx] = entry
         node[6] = bb_entries
         idx_nodes_set[node_idx] = node
 
-    return idx_nodes_set, bt_set
+    return idx_nodes_set, bt_set, blackboard_set
 
 
 def clean_files(filename, dir):
@@ -471,9 +525,9 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
     print("-- Stack Size:     ", stack)
     print("-- Thread Priority:", prio)
 
-    nodes, bt = build_bt_set(builtin, root)
+    nodes, bt, blackboard = build_bt_set(builtin, root)
     generate_files(zephyrbt, output_inc, output_data, output_stub, builtin,
-                   nodes, bt, stack, prio, user_file)
+                   nodes, bt, blackboard, stack, prio, user_file)
 
 
 if __name__ == "__main__":

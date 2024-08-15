@@ -34,6 +34,10 @@ enum zephyrbt_blackboard_item_type {
 	ZEPHYRBT_BLACKBOARD_ITEM_INOUT_TYPE,
 };
 
+enum zephyrbt_blackboard_item_entry {
+	ZEPHYRBT_BLACKBOARD_ITEM_ENTRY_KEY,
+};
+
 typedef int16_t zephyrbt_node_idx_t;
 typedef void *zephyrbt_node_context_t;
 

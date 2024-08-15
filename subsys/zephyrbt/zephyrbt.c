@@ -32,9 +32,23 @@ inline struct zephyrbt_node *zephyrbt_get_node(struct zephyrbt_context *ctx, int
 inline struct zephyrbt_blackboard_item *zephyrbt_search_blackboard(struct zephyrbt_context *ctx,
 								   const int index, const int key)
 {
+	int reference = -1;
+
 	for (struct zephyrbt_blackboard_item *entry = ctx->blackboard;
 	     entry != NULL && entry->idx != -1; ++entry) {
 		if (entry->idx == index && entry->key == key) {
+			if (entry->ref == -1) {
+				return entry;
+			}
+
+			reference = entry->ref;
+			break;
+		}
+	}
+
+	for (struct zephyrbt_blackboard_item *entry = ctx->blackboard;
+	     entry != NULL && entry->idx != -1; ++entry) {
+		if (entry->idx == reference && entry->key == ZEPHYRBT_BLACKBOARD_ITEM_ENTRY_KEY) {
 			return entry;
 		}
 	}
