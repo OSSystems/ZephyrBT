@@ -10,6 +10,7 @@ zephyr_sources_ifdef(CONFIG_ZEPHYR_BEHAVIOUR_TREE
 )
 
 zephyr_sources_ifdef(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
+	zephyrbt_action_set_blackboard.c
 	zephyrbt_action_sleep.c
 	zephyrbt_decorator_delay.c
 	zephyrbt_decorator_run_once.c

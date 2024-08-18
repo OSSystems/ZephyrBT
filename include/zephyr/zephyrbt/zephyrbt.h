@@ -135,6 +135,15 @@ enum zephyrbt_child_status zephyrbt_action_always_success(struct zephyrbt_contex
 							  struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_action_always_failure(struct zephyrbt_context *ctx,
 							  struct zephyrbt_node *self);
+enum zephyrbt_set_blackboard_attributes {
+	ZEPHYRBT_SET_BLACKBOARD_ATTRIBUTE_VALUE,
+	ZEPHYRBT_SET_BLACKBOARD_ATTRIBUTE_OUTPUT_KEY,
+};
+enum zephyrbt_child_status zephyrbt_action_set_blackboard(struct zephyrbt_context *ctx,
+							  struct zephyrbt_node *self);
+enum zephyrbt_child_status zephyrbt_action_set_blackboard_init(struct zephyrbt_context *ctx,
+							       struct zephyrbt_node *self);
+
 enum zephyrbt_sleep_attributes {
 	ZEPHYRBT_SLEEP_ATTRIBUTE_MSEC,
 };

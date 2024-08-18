@@ -483,6 +483,10 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
     zephyrbt = Path(zephyrbt_filename).stem
 
     sleep =    [['msec', 'input_port', None, 'Wait the amount of milliseconds']]
+    setblackboard = [
+                ['value', 'input_port', None, 'Value is a param that can be represented as an integer (macro, CONFIG_, constant, 0x, etc)'],
+                ['output_key', 'inout_port', None, 'Name of the blackboard entry where the value should be written']
+               ]
 
     parallel = [['failure_count', 'input_port', '1', 'number of children which need to fail to trigger a FAILURE'],
                 ['success_count', 'input_port', '-1', 'number of children which need to succeed to trigger a SUCCESS']
@@ -496,6 +500,7 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
     builtin = [('always_success', 'action',    False, []),
                ('always_failure', 'action',    False, []),
                ('sleep',          'action',    True,  sleep),
+               ('set_blackboard', 'action',    True,  setblackboard),
                ('fallback',       'control',   False, []),
                ('sequence',       'control',   False, []),
                ('parallel',       'control',   True,  parallel),
