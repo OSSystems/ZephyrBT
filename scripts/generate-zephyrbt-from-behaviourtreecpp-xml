@@ -137,14 +137,14 @@ def write_zephyrbt_custom_function(f, nodes):
         f.write(f"\nenum zephyrbt_child_status __attribute__((weak))")
         f.write(f"\n{fname}struct zephyrbt_context *ctx,\n")
         f.write(f"{gen_align(fname)}struct zephyrbt_node *self)\n{{\n")
-        f.write(f"\tLOG_WRN(\"{fname[:-1]} stub function\");\n");
+        f.write(f"\tLOG_DBG(\"{fname[:-1]} stub function\");\n");
         f.write(f"\treturn ZEPHYRBT_CHILD_SUCCESS_STATUS;\n");
         f.write(f"}}\n");
         fname = f"{fname[0:-1]}_init("
         f.write(f"\nenum zephyrbt_child_status __attribute__((weak))")
         f.write(f"\n{fname}struct zephyrbt_context *ctx,\n")
         f.write(f"{gen_align(fname)}struct zephyrbt_node *self)\n{{\n")
-        f.write(f"\tLOG_WRN(\"{fname[:-1]} stub function\");\n");
+        f.write(f"\tLOG_DBG(\"{fname[:-1]} stub function\");\n");
         f.write(f"\treturn ZEPHYRBT_CHILD_SUCCESS_STATUS;\n");
         f.write(f"}}\n");
 
