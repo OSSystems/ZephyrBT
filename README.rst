@@ -7,7 +7,7 @@
 Zephyr Behaviour Tree
 #####################
 
-This repository is the Zephyr Behavior Tree module.
+This repository is the Zephyr Behaviour Tree module.
 
 Preparation
 ***********
@@ -86,18 +86,20 @@ Make sure that all requirements are meet:
 Examples
 ********
 
+* The `Tutorial`_ guide you step by step on ZephyrBT (comming soon).
+
 * The `Minimal`_ is an example how to use the ZephyrBT without any IDE.
+
 * The `Dynamic`_ uses their own thread and generate data and stubs from `Groot2`_ IDE.
-* The ``Tutorial`` guide you step by step on ZephyrBT (comming soon).
-
-.. _Minimal:
-  https://github.com/OSSystems/ZephyrBT/blob/master/samples/subsys/zephyrbt/minimal/README.rst
-
-.. _Dynamic:
-  https://github.com/OSSystems/ZephyrBT/blob/master/samples/subsys/zephyrbt/dynamic/README.rst
 
 .. _Tutorial:
-  https://github.com/OSSystems/ZephyrBT/blob/master/samples/subsys/zephyrbt/tutorial/README.rst
+  samples/subsys/zephyrbt/tutorial/README.rst
+
+.. _Minimal:
+  samples/subsys/zephyrbt/minimal/README.rst
+
+.. _Dynamic:
+  samples/subsys/zephyrbt/dynamic/README.rst
 
 .. _Groot2:
   https://www.behaviortree.dev/groot/
@@ -105,8 +107,8 @@ Examples
 Tests
 *****
 
-To execute the tests just run twister pointing the TESTSUITE_ROOT to your $HOME/zephyrbt
-folder.
+To execute the tests just run twister pointing the TESTSUITE_ROOT to your
+$HOME/zephyrbt folder.
 
 .. code-block:: console
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2024 O.S. Systems Software LTDA.
  * Copyright (c) 2024 Freedom Veiculos Eletricos
  *
- * SPDX-License-Identifier: UNLICENSED
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #ifndef ZEPHYR_INCLUDE_ZEPHYRBT_ZEPHYRBT_H_
