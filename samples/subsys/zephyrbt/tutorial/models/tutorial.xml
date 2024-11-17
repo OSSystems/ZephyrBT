@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="tutorial">
+  <BehaviorTree ID="tutorial">
+    <Delay delay_msec="2000">
+      <Fallback>
+        <Sequence>
+          <Open/>
+          <Find/>
+          <GrabBeer/>
+          <Close/>
+          <Drink/>
+        </Sequence>
+        <Sequence>
+          <GrabWater/>
+          <Drink/>
+        </Sequence>
+        <Alert/>
+      </Fallback>
+    </Delay>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="Alert"
+            editable="true"/>
+    <Action ID="Close"
+            editable="true"/>
+    <Action ID="Drink"
+            editable="true"/>
+    <Action ID="Find"
+            editable="true"/>
+    <Action ID="GrabBeer"
+            editable="true"/>
+    <Action ID="GrabWater"
+            editable="true"/>
+    <Action ID="Open"
+            editable="true"/>
+  </TreeNodesModel>
+
+</root>
