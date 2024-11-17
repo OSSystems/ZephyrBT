@@ -16,12 +16,9 @@ Building and Running
 
 This application can be built and executed on ``native_posix_64`` as follows:
 
-.. zephyr-app-commands::
-   :zephyr-app: samples/subsys/zephyrbt/minimal
-   :host-os: unix
-   :board: native_posix_64
-   :goals: run
-   :compact:
+.. code-block:: console
+
+   west build -p -b native_posix_64 samples/subsys/zephyrbt/minimal -t run
 
 To build for another board, change "native_posix_64" above to that board's name.
 
