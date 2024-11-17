@@ -16,12 +16,9 @@ Building and Running
 
 This application can be built and executed on ``native_posix_64`` as follows:
 
-.. zephyr-app-commands::
-   :zephyr-app: samples/subsys/zephyrbt/dynamic
-   :host-os: unix
-   :board: native_posix_64
-   :goals: run
-   :compact:
+.. code-block:: console
+
+   west build -p -b native_posix_64 samples/subsys/zephyrbt/dynamic -t run
 
 To build for another board, change "native_posix_64" above to that board's name.
 
@@ -30,21 +27,19 @@ Sample Output
 
 .. code-block:: console
 
-   [2/130] Generating include/generated/version.h
-   -- Zephyr version: 3.6.99 (/home/gfbudke/workspace/freedom/deps/zephyr), build: v3.6.0-2217-gd3a962733227
-   [13/130] Generating include/lc_rs_bt.h, src/lc_rs_bt_data.c, src/lc_rs_bt_stub.c
-   -- Behaviour Tree:  lc_rs_bt
-   -- Stack Size:      1024
-   -- Thread Priority: 0
-   [23/130] Generating /home/gfbudke/workspace/freedom/deps/modules/zep...s/modules/zephyrbt/samples/subsys/zephyrbt/dynamic/src/modelo_stub.c
+   -- Zephyr version: 4.0.99 (/home/gfbudke/Documents/Zephyr/zephyrbt/deps/zephyr), build: v4.0.0-288-g68361eacfa0d
+   [94/111] Generating include/modelo.h, src/modelo_data.c, src/modelo_stub.c
    -- Behaviour Tree:  modelo
    -- Stack Size:      1024
    -- Thread Priority: 0
-   [129/130] Linking C executable zephyr/zephyr.elf
-   Generating files from /home/gfbudke/workspace/freedom/build/zephyr/zephyr.elf for board: native_posix
-   [129/130] cd /home/gfbudke/workspace/freedom/build && /home/gfbudke/workspace/freedom/build/zephyr/zephyr.exe
-   uart connected to pseudotty: /dev/pts/1
-   *** Booting Zephyr OS build v3.6.0-2217-gd3a962733227 ***
+   [95/111] Generating include/lc_rs_bt.h, src/lc_rs_bt_data.c, src/lc_rs_bt_stub.c
+   -- Behaviour Tree:  lc_rs_bt
+   -- Stack Size:      1024
+   -- Thread Priority: 0
+   [110/111] Linking C executable zephyr/zephyr.elf
+   Generating files from /home/gfbudke/Documents/Zephyr/zephyrbt/zephyrbt/build/zephyr/zephyr.elf for board: native_posix
+   [110/111] cd /home/gfbudke/Documents/Zephyr/zephyrbt/zephyrbt/build && /home/gfbudke/Documents/Zephyr/zephyrbt/zephyrbt/build/zephyr/zephyr.exe
+   *** Booting Zephyr OS build v4.0.0-288-g68361eacfa0d ***
    [00:00:00.000,000] <dbg> zephyrbt: zephyrbt_thread_func: tick
    [00:00:00.000,000] <dbg> zephyrbt: zephyrbt_evaluate: A [control, 12]
    [00:00:00.000,000] <dbg> zephyrbt: zephyrbt_evaluate: Deep: 1
