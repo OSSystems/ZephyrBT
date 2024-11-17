@@ -92,12 +92,12 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 {
 	struct zephyrbt_context *ctx = (struct zephyrbt_context *)zephyrbt_ctx;
 	if (ctx == NULL) {
-		LOG_ERR("The behavior tree context is invalid. Thread aborted!");
+		LOG_ERR("The behaviour tree context is invalid. Thread aborted!");
 		return;
 	}
 
 	if (ctx->node == NULL) {
-		LOG_ERR("The behavior tree API is invalid. Thread aborted!");
+		LOG_ERR("The behaviour tree API is invalid. Thread aborted!");
 		return;
 	}
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="tutorial">
+  <BehaviorTree ID="tutorial">
+    <Delay delay_msec="2000">
+      <Fallback>
+        <Sequence>
+          <Open fridge_door_is_open="{fridge_door_is_open}"/>
+          <Find/>
+          <GrabBeer/>
+          <Close fridge_door_is_open="{fridge_door_is_open}"/>
+          <Drink/>
+        </Sequence>
+        <Sequence>
+          <GrabWater/>
+          <Drink/>
+        </Sequence>
+        <Alert/>
+      </Fallback>
+    </Delay>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="Alert"
+            editable="true"/>
+    <Action ID="Close"
+            editable="true">
+      <input_port name="fridge_door_is_open"/>
+    </Action>
+    <Action ID="Drink"
+            editable="true"/>
+    <Action ID="Find"
+            editable="true"/>
+    <Action ID="GrabBeer"
+            editable="true"/>
+    <Action ID="GrabWater"
+            editable="true"/>
+    <Action ID="Open"
+            editable="true">
+      <output_port name="fridge_door_is_open"
+                   default="{fridge_door_is_open}"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>
