@@ -20,7 +20,7 @@ enum zephyrbt_child_status zephyrbt_action_init_tree_init(struct zephyrbt_contex
 	struct tutorial_context *global_ctx;
 
 	global_ctx = k_malloc(sizeof(struct tutorial_context));
-	self->ctx = global_ctx;
+	ctx->user_data = global_ctx;
 
 	if (global_ctx == NULL) {
 		LOG_ERR("Context can not be allocate. Need more memory!!");
