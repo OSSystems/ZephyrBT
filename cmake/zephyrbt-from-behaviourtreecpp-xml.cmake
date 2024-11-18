@@ -22,7 +22,7 @@ function(zephyrbt_define_from_behaviourtreecpp_xml
   set(zephyrbt_data_file "${output_src}/${zephyrbt_name}_data.c")
   set(zephyrbt_stub_file "${output_src}/${zephyrbt_name}_stub.c")
 
-  file(GLOB_RECURSE zephyrbt_user_include zephyrbt_user.h)
+  file(GLOB_RECURSE zephyrbt_user_include ${CMAKE_CURRENT_SOURCE_DIR}/include/zephyrbt_user.h)
   string(LENGTH "${zephyrbt_user_include}" zephyrbt_user_include_valid)
 
   if(${zephyrbt_user_include_valid} GREATER 0)
