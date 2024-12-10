@@ -47,6 +47,11 @@ Lessons
 * `lesson 4 - The Behaviour Tree user data holder`_
 * `lesson 5 - Using ZBUS`_
 
+Slides
+******
+
+* `First Zephyr meetup on Zurich - Switzerland (21-Nov-2024)`_
+
 .. _lesson 1 - Implement the First Action:
   lessons/lesson-1/lesson-1.rst
 
@@ -61,3 +66,6 @@ Lessons
 
 .. _lesson 5 - Using ZBUS:
   lessons/lesson-5/lesson-5.rst
+
+.. _First Zephyr meetup on Zurich - Switzerland (21-Nov-2024):
+  lessons/ZephyrRTOS-BT-2024-11.pptx
