@@ -1,5 +1,5 @@
-.. Copyright (c) 2024 O.S. Systems Software LTDA.
-.. Copyright (c) 2024 Freedom Veiculos Eletricos
+.. Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+.. Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 .. SPDX-License-Identifier: Apache-2.0
 
 .. _zephyr_behaviour_tree_module:
@@ -14,7 +14,7 @@ Preparation
 
 The first step is prepare the development machine. The developer must follow the
 steps at `Zephyr RTOS getting started`_. The recommendation is test using the
-``native_posix`` board. In this case, the last step from procedure should try
+``qemu_cortex_m3`` board. In this case, the last step from procedure should try
 using this command:
 
 .. code-block:: console
@@ -23,7 +23,7 @@ using this command:
 
 .. code-block:: console
 
-  west build -b native_posix samples/hello_world -t run
+  west build -b qemu_cortex_m3 samples/hello_world -t run
 
 The second step is add your credentials to github. This will add necessary
 permissions to clone using ssh and send changes. The github documentation can

@@ -313,7 +313,7 @@ def getSearchBuiltinNode(builtin, name):
 
 def getChildIdx(idx_table, num, elem, root, mainroot):
     child = None
-    if elem:
+    if len(elem):
         for subelem in elem:
             if subelem.tag == "SubTree":
                 subelem = resolveSubTree(subelem, mainroot)
