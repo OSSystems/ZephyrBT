@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 O.S. Systems Software LTDA.
- * Copyright (c) 2024 Freedom Veiculos Eletricos
+ * Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+ * Copyright (c) 2024-2025 Freedom Veiculos Eletricos
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -130,6 +130,12 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 	while (true) {
 		LOG_DBG("tick");
 		zephyrbt_evaluate(ctx, zephyrbt_get_root(ctx));
+
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_ALLOW_YIELD)
+		if (ctx->thread_yield) {
+			k_yield();
+		}
+#endif
 	}
 }
 

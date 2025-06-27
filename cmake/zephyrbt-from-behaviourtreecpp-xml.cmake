@@ -1,16 +1,17 @@
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 include(CheckIncludeFile)
 
 function(zephyrbt_define_from_behaviourtreecpp_xml
-    target      # The current target used to add the generated files
-    input_file  # The behaviour tree input file
-    output_inc  # Output directory of the generated header
-    output_src  # Output directory of the generated sources
-    stack_size  # The amount of RAM used to run the BT
-    thread_prio # The Thread Priority
+    target       # The current target used to add the generated files
+    input_file   # The behaviour tree input file
+    output_inc   # Output directory of the generated header
+    output_src   # Output directory of the generated sources
+    stack_size   # The amount of RAM used to run the BT
+    thread_prio  # The Thread Priority
+    thread_yield # The Thread yield option [ True or False ]
     )
   get_filename_component(zephyrbt_name ${input_file} NAME_WE [CACHE])
   get_filename_component(input_file ${input_file} ABSOLUTE)
@@ -31,6 +32,16 @@ function(zephyrbt_define_from_behaviourtreecpp_xml
     set(zephyrbt_user_include_file "")
   endif()
 
+  if(${CONFIG_ZEPHYR_BEHAVIOUR_TREE_ALLOW_YIELD})
+    if(${thread_yield})
+      set(zephyrbt_thread_yield "-y 1")
+    else()
+      set(zephyrbt_thread_yield "-y 0")
+    endif()
+  else()
+    set(zephyrbt_thread_yield "-y 2")
+  endif()
+
   add_custom_command(
     OUTPUT  ${zephyrbt_inc_file}
             ${zephyrbt_data_file}
@@ -44,6 +55,7 @@ function(zephyrbt_define_from_behaviourtreecpp_xml
       -ot ${zephyrbt_stub_file}
       -s  ${stack_size}
       -p  ${thread_prio}
+      ${zephyrbt_thread_yield}
       ${zephyrbt_user_include_file}
   )
 

@@ -1,5 +1,5 @@
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 config ZEPHYR_BEHAVIOUR_TREE
@@ -30,6 +30,25 @@ config ZEPHYR_BEHAVIOUR_TREE_DYNAMIC
 	depends on KERNEL_MEM_POOL
 	help
 	  Enable use of dynamic memory.
+
+config ZEPHYR_BEHAVIOUR_TREE_ALLOW_YIELD
+	bool "Automatically yield on each turn"
+	depends on ZEPHYR_BEHAVIOUR_TREE_DYNAMIC
+	default y
+	help
+	  The behaviour tree will check to call k_yield() to give opportunity
+	  to same threads to execute. This do not affect the time slice
+	  configuration and both can be used.
+
+	  The time slice can be useful when a very long action may block tree
+	  walk. To enable time slice make sure that behaviour tree priority is
+	  greater than TIMESLICE_PRIORITY and TIMESLICING=y.
+
+	  If you want to have best walk performace you should disable this
+	  option. If you do that you can have side effects like starvation and
+	  may not attend all interrupts depending of the priority you select.
+
+	  If you do not know what you are configuring leave as is.
 
 config ZEPHYR_BEHAVIOUR_TREE_NODE_INIT
 	bool "Generate node initialization function"

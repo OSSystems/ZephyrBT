@@ -1,5 +1,5 @@
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.20.0)
@@ -23,4 +23,5 @@ zephyrbt_define_from_behaviourtreecpp_xml(app
 	${CMAKE_BINARY_DIR}/src
 	1024
 	0
+	yes
 )
