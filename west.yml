@@ -1,5 +1,5 @@
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 manifest:
@@ -19,7 +19,7 @@ manifest:
       import:
         path-prefix: deps
         path-allowlist:
-          - modules/hal/cmsis
+          - modules/hal/cmsis_6
           - modules/hal/stm32
 
   self:

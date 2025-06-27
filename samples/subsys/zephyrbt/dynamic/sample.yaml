@@ -1,5 +1,5 @@
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 sample:
@@ -9,7 +9,7 @@ common:
 tests:
   samples.zephyrbt.dynamic:
     platform_allow:
-      - native_posix/native/64
+      - qemu_cortex_m3
       - nucleo_f767zi
     harness: console
     harness_config:

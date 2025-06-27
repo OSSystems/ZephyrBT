@@ -75,10 +75,10 @@ struct zephyrbt_blackboard_item {
 struct zephyrbt_context {
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO
 	const char *name;
-	size_t deep;
+	uint32_t deep;
 #endif
 	struct zephyrbt_node *node;
-	const size_t nodes;
+	const uint32_t nodes;
 	struct zephyrbt_blackboard_item *blackboard;
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_USER_DATA
 	void *user_data;
