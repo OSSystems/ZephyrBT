@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -8,7 +8,7 @@
     };
 
     treefmt-nix = {
-      url = "github:numtide/treefmt-nix";
+      url = "github:numtide/treefmt-nix/246639a1ec081bb40941a25e9eb8481a66d71b49";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -53,10 +53,17 @@
               black.enable = true;
               clang-format = {
                 enable = true;
-                package = pkgs.clang-tools_17;
+                package = pkgs.clang-tools_19;
               };
               nixpkgs-fmt.enable = true;
               shfmt.enable = true;
+            };
+
+            settings.formatter = {
+              clang-format = {
+                options = [ "-i" "-style=file:${inputs.zephyr-nix.inputs.zephyr}/.clang-format" ];
+                excludes = [ "build/*" "twister-out*/*" ];
+              };
             };
           };
 
@@ -66,7 +73,7 @@
             ];
 
             packages = [
-              (zephyr.sdk.override {
+              (zephyr.sdk-0_17.override {
                 targets = [
                   "arm-zephyr-eabi"
                 ];
