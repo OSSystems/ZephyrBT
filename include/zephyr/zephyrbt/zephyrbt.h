@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 O.S. Systems Software LTDA.
- * Copyright (c) 2024 Freedom Veiculos Eletricos
+ * Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+ * Copyright (c) 2024-2025 Freedom Veiculos Eletricos
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -89,6 +89,9 @@ struct zephyrbt_context {
 	const int stack_size;
 	const int thread_prio;
 	k_tid_t tid;
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_ALLOW_YIELD
+	bool thread_yield;
+#endif
 #endif
 };
 
@@ -102,10 +105,12 @@ struct zephyrbt_context {
  * @param _nodes	The Behaviour Tree nodes structure.
  * @param _stack_size	Thread stack size.
  * @param _thread_prio  Thread priority.
+ * @param _thread_yield Thread should yield. Default is True.
  * @param _user_data	User defined data. Default is NULL.
  * @param _blackboard	The Behaviour Tree blackboard structure.
  */
-#define ZEPHYRBT_DEFINE(_name, _nodes, _stack_size, _thread_prio, _user_data, _blackboard)	   \
+#define ZEPHYRBT_DEFINE(_name, _nodes, _stack_size, _thread_prio,				   \
+			_thread_yield, _user_data, _blackboard)					   \
 	STRUCT_SECTION_ITERABLE(zephyrbt_context, _name) = {					   \
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (				   \
 			.name = #_name,								   \
@@ -116,7 +121,10 @@ struct zephyrbt_context {
 		)										   \
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_DYNAMIC, (				   \
 			.stack_size  = _stack_size,						   \
-			.thread_prio = _thread_prio, )						   \
+			.thread_prio = _thread_prio,						   \
+			IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_ALLOW_YIELD, (			   \
+				.thread_yield = _thread_yield, )				   \
+			))									   \
 		)										   \
 		.node       = _nodes,								   \
 		.nodes      = ARRAY_SIZE(_nodes),						   \

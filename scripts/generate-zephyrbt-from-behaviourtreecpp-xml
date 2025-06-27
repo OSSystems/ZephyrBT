@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 """
@@ -214,7 +214,7 @@ def write_zephyrbt_blackboard_table(f, nodes, builtin, bt, blackboard, name):
 
 
 def generate_files(filename, output_inc, output_data, output_stub, builtin,
-                   nodes, bt, blackboard, stack, prio, user_file):
+                   nodes, bt, blackboard, stack, prio, thread_yield, user_file):
     with open(output_inc, "w") as f:
         f.write(HEADER)
         f.write(f"\n#ifndef {filename.upper()}_H")
@@ -235,7 +235,7 @@ def generate_files(filename, output_inc, output_data, output_stub, builtin,
         write_zephyrbt_nodes_table(f, nodes, builtin, bt, node_data_name)
         write_zephyrbt_blackboard_table(f, nodes, builtin, bt, blackboard, node_blackboard_name)
         f.write(f"\nZEPHYRBT_DEFINE({filename}, {filename}_nodes, ")
-        f.write(f"{stack}, {prio}, NULL, {filename}_blackboard);\n")
+        f.write(f"{stack}, {prio}, {'true' if thread_yield == 1 else 'false'}, NULL, {filename}_blackboard);\n")
 
     with open(output_stub, "w") as f:
         node_data_name = f"{filename}_nodes"
@@ -479,7 +479,7 @@ def clean_files(filename, dir):
 
 
 def main(zephyrbt_filename, output_inc, output_data, output_stub,
-         stack, prio, user_file) -> None:
+         stack, prio, thread_yield, user_file) -> None:
     zephyrbt = Path(zephyrbt_filename).stem
 
     sleep =    [['msec', 'input_port', None, 'Wait the amount of milliseconds']]
@@ -526,13 +526,22 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
         print('Incompatible version')
         exit -1
 
+    match thread_yield:
+        case 0:
+            thread_yield_text = "False"
+        case 1:
+            thread_yield_text = "True"
+        case 2:
+            thread_yield_text = "Not available"
+
     print("-- Behaviour Tree: ", zephyrbt)
     print("-- Stack Size:     ", stack)
     print("-- Thread Priority:", prio)
+    print("-- Thread Yield:   ", thread_yield_text)
 
     nodes, bt, blackboard = build_bt_set(builtin, root)
     generate_files(zephyrbt, output_inc, output_data, output_stub, builtin,
-                   nodes, bt, blackboard, stack, prio, user_file)
+                   nodes, bt, blackboard, stack, prio, thread_yield, user_file)
 
 
 if __name__ == "__main__":
@@ -580,13 +589,21 @@ if __name__ == "__main__":
         help="The Thread Priority",
     )
     parser.add_argument(
+        "-y",
+        "--thread_yield",
+        type=int,
+        default=0,
+        help="The Thread yield",
+    )
+    parser.add_argument(
         "-u",
         "--user_file",
         type=bool,
         default=False,
         help="Add user include file into code generation",
     )
+
     args = parser.parse_args()
 
     main(args.input, args.outinc, args.outdata, args.outstub,
-         args.stack, args.prio, args.user_file)
+         args.stack, args.prio, args.thread_yield, args.user_file)
