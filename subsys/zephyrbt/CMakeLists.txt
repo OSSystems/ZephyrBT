@@ -1,5 +1,5 @@
-# Copyright (c) 2024 O.S. Systems Software LTDA.
-# Copyright (c) 2024 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 zephyr_sources_ifdef(CONFIG_ZEPHYR_BEHAVIOUR_TREE
@@ -17,4 +17,10 @@ zephyr_sources_ifdef(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
 	zephyrbt_decorator_timeout.c
 )
 
+# Support LD linker template
 zephyr_linker_sources(DATA_SECTIONS zephyrbt.ld)
+
+# Support CMake linker generator
+zephyr_iterable_section(
+  NAME zephyr_behaviour_tree
+  GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT})
