@@ -90,6 +90,12 @@
               pkgs.cmake
               pkgs.ninja
             ];
+
+            shellHook = ''
+              export LOCALE_ARCHIVE="${pkgs.glibcLocales}/lib/locale/locale-archive";
+              export LC_ALL="C.UTF-8";
+              export LANG="C.UTF-8";
+            '';
           };
         };
     };
