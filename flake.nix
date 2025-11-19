@@ -93,4 +93,13 @@
           };
         };
     };
+
+  nixConfig = {
+    extra-substituters = [
+      "https://cache.freedom.ind.br"
+    ];
+    extra-trusted-public-keys = [
+      "cache.freedom.ind.br:4+Tt+AZreSw+P7xP0d6eHtIHhSAlkFbSa/9ugOkiMSM="
+    ];
+  };
 }
