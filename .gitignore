@@ -9,3 +9,5 @@ __pycache__/
 /build
 /twister-out*/
 *~
+/deps/
+__init__.py
