@@ -157,13 +157,13 @@
       "locked": {
         "lastModified": 1763734085,
         "narHash": "sha256-KNaUKEvmCrA39ZRp0ZgIXdLKmK0ruR5wrhH9mJaF/bI=",
-        "owner": "adisbladis",
+        "owner": "nix-community",
         "repo": "zephyr-nix",
         "rev": "c041f535856725919b73a29d53ea2292b2a7c308",
         "type": "github"
       },
       "original": {
-        "owner": "adisbladis",
+        "owner": "nix-community",
         "repo": "zephyr-nix",
         "type": "github"
       }

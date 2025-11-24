@@ -18,7 +18,7 @@
     };
 
     zephyr-nix = {
-      url = "github:adisbladis/zephyr-nix";
+      url = "github:nix-community/zephyr-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
