@@ -14,4 +14,4 @@ if [ -z $(find -'(' -name sample.yaml -o -name testcase.yaml -')' -a -print -qui
     exit 0
 fi
 
-../deps/zephyr/scripts/twister -G --testsuite-root . $@
+./deps/zephyr/scripts/twister -G --board-root . --testsuite-root samples/ $@

@@ -12,6 +12,7 @@ basedir=$(dirname $(dirname $(readlink -f $0)))
 
 cd $basedir
 find -type f -'(' -name "*.c" -o -name "*.h" -')' \
-	-not -path "./build/*" \
-	-print0 \
-    | xargs -0 clang-format -style=file:.clang-format -i
+    -not -path "./build/*" \
+    -not -path "./deps/*" \
+    -print0 |
+    xargs -0 clang-format -style=file:.clang-format -i
