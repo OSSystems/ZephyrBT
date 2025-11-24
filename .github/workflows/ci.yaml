@@ -63,7 +63,6 @@ jobs:
 
       - name: Prepare Zephyr Project workspace
         run: |
-          west init -l . 
           west config --global update.narrow true
           west update
 
