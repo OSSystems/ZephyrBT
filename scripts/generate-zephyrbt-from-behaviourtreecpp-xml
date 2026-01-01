@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
-# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2026 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2026 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 """
@@ -20,6 +20,7 @@ import struct
 
 from natsort import natsorted
 import xml.etree.ElementTree as ET
+import copy
 
 REPO_ROOT = Path(__file__).absolute().parents[1]
 HEADER = """/*
@@ -422,6 +423,34 @@ def addBlackboardVariables(idx_nodes_set, blackboard_set):
             index = loadBlackboardVariables(index, str(blackboard[0][1]), blackboard_set)
 
 
+def expand_subtrees(elem, root):
+    """
+    Recursively expand SubTree nodes by replacing them with deep copies
+    of their referenced tree content. This ensures each subtree instance
+    has unique element IDs when a subtree is used multiple times.
+    """
+    i = 0
+    while i < len(elem):
+        child = elem[i]
+        if child.tag == 'SubTree':
+            subtree_id = child.get('ID')
+            for tree in root.iter('BehaviorTree'):
+                if tree.attrib.get('ID') == subtree_id:
+                    # Create a deep copy of the subtree content
+                    subtree_content = copy.deepcopy(tree[0])
+                    # Remove the SubTree placeholder
+                    elem.remove(child)
+                    # Insert the expanded content
+                    elem.insert(i, subtree_content)
+                    # Recursively expand any nested subtrees in the copy
+                    expand_subtrees(subtree_content, root)
+                    break
+        else:
+            # Recursively process non-SubTree children
+            expand_subtrees(child, root)
+        i += 1
+
+
 def build_bt_set(builtin, root):
     main = root.attrib.get('main_tree_to_execute')
 
@@ -438,8 +467,14 @@ def build_bt_set(builtin, root):
         if elem.attrib.get('ID') != main:
             continue
 
-        parseNodes(builtin, idx_nodes_set, custom_set, 0, elem[0], root)
-        assemblyBT(builtin, idx_nodes_set, bt_set, 0, elem[0], elem[0], root)
+        # Deep copy and expand the main tree before processing.
+        # This ensures each subtree instance has unique element IDs
+        # when a subtree is used multiple times (fixes issue #28).
+        main_tree = copy.deepcopy(elem[0])
+        expand_subtrees(main_tree, root)
+
+        parseNodes(builtin, idx_nodes_set, custom_set, 0, main_tree, root)
+        assemblyBT(builtin, idx_nodes_set, bt_set, 0, main_tree, main_tree, root)
         break
 
     addBuiltinBlackboard(idx_nodes_set, blackboard_set, builtin)

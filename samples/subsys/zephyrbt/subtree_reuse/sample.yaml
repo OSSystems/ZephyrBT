@@ -1,0 +1,37 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Subtree Reuse (Issue #28)
+  description: |
+    This sample validates correct traversal when a subtree is used multiple
+    times in the same behavior tree. It reproduces the scenario from issue #28
+    where incorrect indices caused nodes to be skipped during execution.
+common:
+  tags: zephyrbt
+tests:
+  samples.zephyrbt.subtree_reuse:
+    platform_allow:
+      - qemu_cortex_m3
+      - nucleo_f767zi
+    harness: console
+    harness_config:
+      type: multi_line
+      regex:
+        - "D: tick"
+        - "D: eval sequence \\[control, 4\\]"
+        - "D: Deep: 1"
+        - "D: sequence \\[control, 4\\]"
+        - "D: eval sub \\[action, 3\\]"
+        - "D: Deep: 2"
+        - "D: zephyrbt_action_sub stub function"
+        - "D: eval a \\[action, 2\\]"
+        - "D: Deep: 2"
+        - "D: zephyrbt_action_a stub function"
+        - "D: eval sub \\[action, 1\\]"
+        - "D: Deep: 2"
+        - "D: zephyrbt_action_sub stub function"
+        - "D: eval b \\[action, 0\\]"
+        - "D: Deep: 2"
+        - "D: zephyrbt_action_b stub function"
