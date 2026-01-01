@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="btree_debug">
+  <BehaviorTree ID="btree_debug">
+    <Sequence>
+      <SubTree ID="btree_subtree"
+               _autoremap="true"/>
+      <A/>
+      <SubTree ID="btree_subtree"
+               _autoremap="true"/>
+      <B/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="btree_subtree">
+    <sub/>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="A"
+            editable="true"/>
+    <Action ID="B"
+            editable="true"/>
+    <Action ID="sub"
+            editable="true"/>
+  </TreeNodesModel>
+
+</root>
