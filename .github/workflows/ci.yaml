@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: nixbuild/nix-quick-install-action@v34
       - name: Restore and cache Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.*') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: nixbuild/nix-quick-install-action@v34
       - name: Restore and cache Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.*') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
