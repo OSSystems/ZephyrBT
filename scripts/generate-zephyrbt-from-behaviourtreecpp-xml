@@ -393,7 +393,7 @@ def loadBlackboardEntries(node_type, blackboard_set):
     entries = []
     for entry in blackboard_set:
         if entry[1] == node_type:
-            entries.append(entry)
+            entries.append(copy.deepcopy(entry))
     return entries
 
 
