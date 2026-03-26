@@ -73,7 +73,7 @@
             ];
 
             packages = [
-              (zephyr.sdk-0_17.override {
+              (zephyr.sdk-1_0_0.override {
                 targets = [
                   "arm-zephyr-eabi"
                 ];
