@@ -1,0 +1,25 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Port Alias (Issue #40)
+  description: |
+    This sample validates that multiple instances of the same node type with
+    different port bindings get distinct blackboard references. It reproduces
+    the scenario from issue #40 where the code generator assigned all instances
+    the same blackboard ref due to shared entry objects.
+
+    This test uses random to create the initial value and uses the special
+    test_port_alias.py to validate the qemu_cortex_m3.
+common:
+  tags: zephyrbt
+tests:
+  samples.zephyrbt.port_alias:
+    platform_allow:
+      - qemu_cortex_m3
+      - nucleo_f767zi
+    harness: pytest
+    harness_config:
+      pytest_root:
+        - "pytest"
