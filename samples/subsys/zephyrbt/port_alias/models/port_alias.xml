@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="btree_port_alias">
+  <BehaviorTree ID="btree_port_alias">
+    <Sequence>
+      <WriteValue value_port="{variable_a}"/>
+      <WriteValue value_port="{variable_b}"/>
+      <ReadValue value_port="{variable_a}"/>
+      <ReadValue value_port="{variable_b}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <TreeNodesModel>
+    <Action ID="WriteValue" editable="true">
+      <output_port name="value_port" default="{value_port}"/>
+    </Action>
+    <Action ID="ReadValue" editable="true">
+      <input_port name="value_port" default="{value_port}"/>
+    </Action>
+  </TreeNodesModel>
+</root>

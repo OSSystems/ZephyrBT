@@ -1,0 +1,30 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Port Alias (Issue #40)
+  description: |
+    This sample validates that multiple instances of the same node type with
+    different port bindings get distinct blackboard references. It reproduces
+    the scenario from issue #40 where the code generator assigned all instances
+    the same blackboard ref due to shared entry objects.
+common:
+  tags: zephyrbt
+tests:
+  samples.zephyrbt.port_alias:
+    platform_allow:
+      - qemu_cortex_m3
+      - nucleo_f767zi
+    harness: console
+    harness_config:
+      type: multi_line
+      regex:
+        - "I: write_value \\[3\\]: wrote 1"
+        - "I: write_value \\[2\\]: wrote 2"
+        - "I: read_value \\[1\\]: read 1"
+        - "I: read_value \\[0\\]: read 2"
+        - "I: write_value \\[3\\]: wrote 3"
+        - "I: write_value \\[2\\]: wrote 4"
+        - "I: read_value \\[1\\]: read 3"
+        - "I: read_value \\[0\\]: read 4"
