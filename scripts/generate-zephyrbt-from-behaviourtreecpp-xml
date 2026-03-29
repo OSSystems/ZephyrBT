@@ -197,6 +197,7 @@ def write_zephyrbt_blackboard_table(f, nodes, builtin, bt, blackboard, name):
     for entry in blackboard:
         if entry[0] >= len(nodes):
             f.write(f"\n\t{{")
+            f.write(f"\n\t\t/* {entry[1]} */")
             f.write(f"\n\t\t.idx = {entry[0]},")
             f.write(f"\n\t\t.ref = -1,")
             f.write(f"\n\t\t.key = ZEPHYRBT_BLACKBOARD_ITEM_ENTRY_KEY,")
@@ -451,12 +452,20 @@ def expand_subtrees(elem, root):
         i += 1
 
 
+def build_bt_set_drop_unused(variable, variables):
+    for var in variables:
+        if variable == var[4]:
+            return True
+    return False
+
+
 def build_bt_set(builtin, root):
     main = root.attrib.get('main_tree_to_execute')
 
     custom_set = []
     idx_nodes_set = []
     bt_set = []
+    blackboard_pre_set = []
     blackboard_set = []
 
     for elem in root.iter('TreeNodesModel'):
@@ -477,18 +486,18 @@ def build_bt_set(builtin, root):
         assemblyBT(builtin, idx_nodes_set, bt_set, 0, main_tree, main_tree, root)
         break
 
-    addBuiltinBlackboard(idx_nodes_set, blackboard_set, builtin)
+    addBuiltinBlackboard(idx_nodes_set, blackboard_pre_set, builtin)
     for elem in root.iter('TreeNodesModel'):
         for e in elem:
-            parseBlackboardEntry(idx_nodes_set, blackboard_set, e)
+            parseBlackboardEntry(idx_nodes_set, blackboard_pre_set, e)
 
-    addBlackboardVariables(idx_nodes_set, blackboard_set)
+    addBlackboardVariables(idx_nodes_set, blackboard_pre_set)
 
     for node_idx in range(0, len(idx_nodes_set)):
         node = idx_nodes_set[node_idx]
         node_type = node[2]
         attribs = node[6]
-        bb_entries = loadBlackboardEntries(node_type, blackboard_set)
+        bb_entries = loadBlackboardEntries(node_type, blackboard_pre_set)
 
         if len(bb_entries) == 0:
             continue
@@ -501,6 +510,24 @@ def build_bt_set(builtin, root):
             bb_entries[entry_idx] = entry
         node[6] = bb_entries
         idx_nodes_set[node_idx] = node
+
+    # Remove un-referenced default variables
+    for entry in blackboard_pre_set:
+        if entry[0] < len(idx_nodes_set):
+            blackboard_set.append(entry)
+            continue
+
+        variable = "{" + entry[1] + "}"
+
+        for node in idx_nodes_set:
+            variables = node[6]
+
+            if len(variables) == 0:
+                continue
+
+            if build_bt_set_drop_unused(variable, variables):
+                blackboard_set.append(entry)
+                break
 
     return idx_nodes_set, bt_set, blackboard_set
 
