@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024-2025 O.S. Systems Software LTDA.
- * Copyright (c) 2024-2025 Freedom Veiculos Eletricos
+ * Copyright (c) 2024-2026 O.S. Systems Software LTDA.
+ * Copyright (c) 2024-2026 Freedom Veiculos Eletricos
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,6 +9,11 @@
 #define ZEPHYR_INCLUDE_ZEPHYRBT_ZEPHYRBT_H_
 
 #include <zephyr/kernel.h>
+
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
+#include <lua.h>
+#include <lauxlib.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +77,35 @@ struct zephyrbt_blackboard_item {
 	const enum zephyrbt_blackboard_item_type type;
 };
 
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
+enum zephyrbt_condition_type {
+	ZEPHYRBT_COND_FAILURE_IF,
+	ZEPHYRBT_COND_SUCCESS_IF,
+	ZEPHYRBT_COND_SKIP_IF,
+	ZEPHYRBT_COND_WHILE,
+	ZEPHYRBT_COND_ON_HALTED,
+	ZEPHYRBT_COND_ON_FAILURE,
+	ZEPHYRBT_COND_ON_SUCCESS,
+	ZEPHYRBT_COND_POST,
+	ZEPHYRBT_COND_COUNT,
+};
+
+struct zephyrbt_node_conditions {
+	int refs[ZEPHYRBT_COND_COUNT];
+};
+
+struct zephyrbt_lua_cond_ref {
+	const int node_idx;
+	const int cond_type;
+	const char *func_name;
+};
+
+struct zephyrbt_bb_name_entry {
+	const char *name;
+	const int bb_idx;
+};
+#endif /* CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS */
+
 struct zephyrbt_context {
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO
 	const char *name;
@@ -92,6 +126,18 @@ struct zephyrbt_context {
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_ALLOW_YIELD
 	bool thread_yield;
 #endif
+#endif
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
+	lua_State *lua;
+	int bb_ref;
+	struct zephyrbt_node_conditions *conditions;
+	const struct zephyrbt_lua_cond_ref *lua_cond_refs;
+	const int lua_cond_ref_count;
+	const struct zephyrbt_bb_name_entry *bb_names;
+	const int bb_names_count;
+	const char *lua_gen_script;
+	const char *const *lua_user_scripts;
+	const int lua_user_script_count;
 #endif
 };
 
@@ -129,6 +175,18 @@ struct zephyrbt_context {
 		.node       = _nodes,								   \
 		.nodes      = ARRAY_SIZE(_nodes),						   \
 		.blackboard = _blackboard,							   \
+		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS, (			   \
+			.lua = NULL,								   \
+			.bb_ref = LUA_NOREF,							   \
+			.conditions = _name##_conditions,					   \
+			.lua_cond_refs = _name##_lua_cond_refs,					   \
+			.lua_cond_ref_count = ARRAY_SIZE(_name##_lua_cond_refs),		   \
+			.bb_names = _name##_bb_names,						   \
+			.bb_names_count = ARRAY_SIZE(_name##_bb_names),				   \
+			.lua_gen_script = _name##_gen_lua_script,				   \
+			.lua_user_scripts = NULL,						   \
+			.lua_user_script_count = 0,						   \
+		))										   \
 	}
 
 // clang-format on
@@ -213,6 +271,15 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
 						      struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_context *ctx,
 							   struct zephyrbt_node *self);
+#endif
+
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
+int zephyrbt_lua_init(struct zephyrbt_context *ctx);
+enum zephyrbt_child_status zephyrbt_lua_pre_check(struct zephyrbt_context *ctx,
+						  struct zephyrbt_node *self);
+void zephyrbt_lua_post_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self,
+			     enum zephyrbt_child_status status);
+bool zephyrbt_lua_while_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
 #endif
 
 #ifdef __cplusplus

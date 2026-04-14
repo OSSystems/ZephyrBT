@@ -1,5 +1,5 @@
-# Copyright (c) 2024-2025 O.S. Systems Software LTDA.
-# Copyright (c) 2024-2025 Freedom Veiculos Eletricos
+# Copyright (c) 2024-2026 O.S. Systems Software LTDA.
+# Copyright (c) 2024-2026 Freedom Veiculos Eletricos
 # SPDX-License-Identifier: Apache-2.0
 
 config ZEPHYR_BEHAVIOUR_TREE
@@ -63,6 +63,26 @@ config ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
 	help
 	  The node context storage functions are available to user when the
 	  node initialization is available.
+
+config ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
+	bool "Enable Lua scripted pre/post conditions"
+	depends on ZEPHYR_BEHAVIOUR_TREE_NODE_INIT
+	depends on ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
+	depends on ZEPHYR_BEHAVIOUR_TREE_DYNAMIC
+	depends on LUA
+	help
+	  Enable pre/post conditions on behaviour tree nodes using Lua
+	  scripts. Conditions are defined as XML attributes (_failureIf,
+	  _successIf, _skipIf, _while, _onSuccess, _onFailure, _onHalted,
+	  _post) and evaluated inline during tree evaluation.
+
+config ZEPHYR_BEHAVIOUR_TREE_LUA_HEAP_SIZE
+	int "Lua heap size in bytes"
+	depends on ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
+	default 16384
+	help
+	  Size of the sys_heap backing the Lua allocator for each
+	  behaviour tree instance.
 
 module = ZEPHYR_BEHAVIOUR_TREE
 module-str = Behaviour Tree

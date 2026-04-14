@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024-2025 O.S. Systems Software LTDA.
- * Copyright (c) 2024-2025 Freedom Veiculos Eletricos
+ * Copyright (c) 2024-2026 O.S. Systems Software LTDA.
+ * Copyright (c) 2024-2026 Freedom Veiculos Eletricos
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -78,7 +78,24 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 	LOG_DBG("Deep: %d", ctx->deep);
 #endif
 
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS)
+	enum zephyrbt_child_status pre = zephyrbt_lua_pre_check(ctx, self);
+	if (pre != ZEPHYRBT_CHILD_RUNNING_STATUS) {
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
+		--ctx->deep;
+#endif
+		return pre;
+	}
+#endif
+
 	enum zephyrbt_child_status status = self->function(ctx, self);
+
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS)
+	if (status == ZEPHYRBT_CHILD_RUNNING_STATUS && !zephyrbt_lua_while_check(ctx, self)) {
+		status = ZEPHYRBT_CHILD_FAILURE_STATUS;
+	}
+	zephyrbt_lua_post_check(ctx, self, status);
+#endif
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	--ctx->deep;
@@ -100,6 +117,13 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 		LOG_ERR("The behaviour tree API is invalid. Thread aborted!");
 		return;
 	}
+
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS)
+	if (zephyrbt_lua_init(ctx) != 0) {
+		LOG_ERR("Lua init failed. Thread aborted!");
+		return;
+	}
+#endif
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INIT)
 	/*

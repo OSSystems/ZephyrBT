@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="LuaConditions">
+  <BehaviorTree ID="LuaConditions">
+    <Delay delay_msec="1000">
+    <Sequence>
+      <!--
+        Phase 1: Increment counter each tick.
+        _skipIf short-circuits when counter exceeds 3.
+        _post increments the ticks counter on each execution.
+      -->
+      <Increment name="inc_counter"
+        counter="{counter}"
+        ticks="{ticks}"
+        _skipIf="bb.counter > 3"
+        _post="bb.ticks = bb.ticks + 1"/>
+
+      <!--
+        Phase 2: Check parity.
+        _successIf returns SUCCESS when counter is even,
+        skipping the actual tick function.
+      -->
+      <CheckValue name="check_even"
+        counter="{counter}"
+        _successIf="bb.counter % 2 == 0"/>
+
+      <!--
+        Phase 3: Guarded action.
+        _failureIf prevents execution when counter == 5.
+        _onSuccess and _onFailure set result flags.
+      -->
+      <GuardedAction name="guarded"
+        counter="{counter}"
+        result="{result}"
+        _failureIf="bb.counter == 5"
+        _onSuccess="bb.result = 1"
+        _onFailure="bb.result = 0"/>
+
+    </Sequence>
+    </Delay>
+  </BehaviorTree>
+
+  <TreeNodesModel>
+    <Action ID="Increment" editable="true">
+      <inout_port name="counter"
+                  default="0"/>
+      <inout_port name="ticks"
+                  default="{ticks}"/>
+    </Action>
+    <Condition ID="CheckValue" editable="true">
+      <input_port name="counter"
+                  default="{counter}"/>
+    </Condition>
+    <Action ID="GuardedAction" editable="true">
+      <input_port name="counter"
+                  default="{counter}"/>
+      <output_port name="result"
+                   default="{result}"/>
+    </Action>
+  </TreeNodesModel>
+</root>
