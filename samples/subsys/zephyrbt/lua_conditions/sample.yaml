@@ -1,0 +1,22 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Lua Conditions
+  description: |
+    Demonstrates pre/post conditions using Lua scripts on
+    behaviour tree nodes. Exercises _skipIf, _successIf,
+    _failureIf, _onSuccess, _onFailure, and _post conditions.
+common:
+  tags: zephyrbt lua
+tests:
+  samples.zephyrbt.lua_conditions:
+    platform_allow:
+      - native_sim/native/64
+      - mps2/an385
+      - nucleo_f767zi
+    harness: pytest
+    harness_config:
+      pytest_root:
+        - "pytest"
