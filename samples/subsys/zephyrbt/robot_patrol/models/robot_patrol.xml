@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="RobotPatrol">
+
+  <!-- ============================================================
+       Main Tree: RobotPatrol
+       Each tick:
+         Render  (display the state captured at last tick's end)
+         Respawn (regenerate world when mission finished)
+         Sense   (refresh sensors and time base)
+         Decide  (fallback: emergency → patrol/return → idle)
+       Visual orchestration lives in XML; pure computation (BFS,
+       grid scans, display) lives in C; predicates live in Lua.
+       ============================================================ -->
+  <BehaviorTree ID="RobotPatrol">
+    <Delay delay_msec="{delay_msec}">
+    <Sequence>
+
+      <Render
+          pos_x="{pos_x}"
+          pos_y="{pos_y}"
+          battery="{battery}"
+          tick_count="{tick_count}"/>
+
+      <Respawn new_mission="{new_mission}"/>
+
+      <Sense
+          battery="{battery}"
+          pos_x="{pos_x}"
+          pos_y="{pos_y}"
+          obstacle_dist="{obstacle_dist}"
+          tick_count="{tick_count}"
+          delay_msec="{delay_msec}"
+          charger_x="{charger_x}"
+          charger_y="{charger_y}"
+          critical_battery="{critical_battery}"
+          min_clearance="{min_clearance}"
+          safe_x="{safe_x}"
+          safe_y="{safe_y}"
+          home_x="{home_x}"
+          home_y="{home_y}"
+          idle_count="{idle_count}"
+          charging="{charging}"/>
+
+      <Fallback name="decide">
+
+        <!-- Priority 1: battery emergency -->
+        <SubTree ID="HandleEmergency"
+            metric="{battery}"
+            threshold="{critical_battery}"
+            response_x="{charger_x}"
+            response_y="{charger_y}"
+            pos_x="{pos_x}"
+            pos_y="{pos_y}"
+            battery="{battery}"
+            charging="{charging}"
+            nav_status="{nav_emergency}"/>
+
+        <!-- Priority 2: obstacle emergency -->
+        <SubTree ID="HandleEmergency"
+            metric="{obstacle_dist}"
+            threshold="{min_clearance}"
+            response_x="{safe_x}"
+            response_y="{safe_y}"
+            pos_x="{pos_x}"
+            pos_y="{pos_y}"
+            battery="{battery}"
+            charging="{charging}"
+            nav_status="{nav_emergency}"/>
+
+        <!-- Priority 3: patrol unfinished waypoints, else home -->
+        <Fallback name="patrol_or_return">
+
+          <!-- 3a: scan the next waypoint, then return home -->
+          <Sequence _skipIf="patrol_done(bb)">
+            <SelectWaypoint name="select_wp"
+                wp_x="{wp_x}"
+                wp_y="{wp_y}"
+                wp_index="{wp_index}"
+                wp_selected_count="{wp_selected_count}"
+                _skipIf="waypoint_already_selected(bb)"
+                _post="on_waypoint_selected(bb)"/>
+            <SubTree ID="NavigateTo"
+                target_x="{wp_x}"
+                target_y="{wp_y}"
+                pos_x="{pos_x}"
+                pos_y="{pos_y}"
+                battery="{battery}"
+                nav_status="{nav_patrol}"/>
+            <PerformScan name="scan"
+                pos_x="{pos_x}"
+                pos_y="{pos_y}"
+                battery="{battery}"
+                scan_result="{scan_result}"
+                targets_found="{targets_found}"
+                scans_completed="{scans_completed}"
+                mission_progress="{mission_progress}"
+                scan_errors="{scan_errors}"
+                _skipIf="bb.nav_home >= 2"
+                _failureIf="scan_too_risky(bb)"
+                _onFailure="on_scan_failed(bb)"/>
+            <SubTree ID="NavigateTo"
+                target_x="{home_x}"
+                target_y="{home_y}"
+                pos_x="{pos_x}"
+                pos_y="{pos_y}"
+                battery="{battery}"
+                nav_status="{nav_home}"/>
+          </Sequence>
+
+          <!-- 3b: after the last scan, park at home base.
+               The Sequence wrapper carries the _skipIf; a raw
+               SubTree's _skipIf is not honoured by the codegen. -->
+          <Sequence _skipIf="at_home(bb)">
+            <SubTree ID="NavigateTo"
+                target_x="{home_x}"
+                target_y="{home_y}"
+                pos_x="{pos_x}"
+                pos_y="{pos_y}"
+                battery="{battery}"
+                nav_status="{nav_home}"/>
+          </Sequence>
+
+        </Fallback>
+
+        <!-- Priority 4: idle (mission done, celebrate, respawn) -->
+        <AlwaysSuccess name="idle"
+            _post="on_idle_tick(bb)"/>
+
+      </Fallback>
+
+    </Sequence>
+    </Delay>
+  </BehaviorTree>
+
+  <!-- ============================================================
+       SubTree: HandleEmergency
+       Port-aliased three times in the main tree:
+         - battery/critical_battery  → charger
+         - obstacle_dist/min_clearance → safe_x/safe_y
+       When the metric drops below the threshold (or charging is
+       already in progress), navigates to the response position,
+       then charges if that position is the charger.  Charge is
+       skipped for obstacle emergencies (response != charger).
+       A final always-success hook resets transient bb state.
+       ============================================================ -->
+  <BehaviorTree ID="HandleEmergency">
+    <Sequence>
+      <CheckMetric
+          metric="{metric}"
+          threshold="{threshold}"
+          charging="{charging}"/>
+      <SubTree ID="NavigateTo"
+          target_x="{response_x}"
+          target_y="{response_y}"
+          pos_x="{pos_x}"
+          pos_y="{pos_y}"
+          battery="{battery}"
+          nav_status="{nav_status}"/>
+      <Charge
+          battery="{battery}"
+          charging="{charging}"
+          _skipIf="bb.pos_x ~= bb.charger_x or
+                   bb.pos_y ~= bb.charger_y"/>
+      <AlwaysSuccess name="emergency_done"
+          _post="on_emergency_response(bb)"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- ============================================================
+       SubTree: NavigateTo
+       BFS pathfinding + step-by-step movement.
+       Port aliased: target/nav_status per instance,
+       pos_x/pos_y shared (robot has one position).
+       nav_status: 0=idle, 1=computing, 2=following, 3=arrived
+       ============================================================ -->
+  <BehaviorTree ID="NavigateTo">
+    <Sequence>
+      <ComputePath
+          target_x="{target_x}"
+          target_y="{target_y}"
+          pos_x="{pos_x}"
+          pos_y="{pos_y}"
+          nav_status="{nav_status}"
+          _skipIf="bb.nav_status >= 2"/>
+      <FollowPath
+          pos_x="{pos_x}"
+          pos_y="{pos_y}"
+          battery="{battery}"
+          nav_status="{nav_status}"
+          _while="bb.nav_status == 2"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- ============================================================
+       TreeNodesModel: port definitions for all custom nodes
+       ============================================================ -->
+  <TreeNodesModel>
+
+    <Action ID="Sense" editable="true">
+      <inout_port name="battery" default="{battery}"/>
+      <inout_port name="pos_x" default="{pos_x}"/>
+      <inout_port name="pos_y" default="{pos_y}"/>
+      <output_port name="obstacle_dist"
+                   default="{obstacle_dist}"/>
+      <inout_port name="tick_count" default="{tick_count}"/>
+      <output_port name="delay_msec" default="{delay_msec}"/>
+      <output_port name="charger_x" default="{charger_x}"/>
+      <output_port name="charger_y" default="{charger_y}"/>
+      <output_port name="critical_battery"
+                   default="{critical_battery}"/>
+      <output_port name="min_clearance"
+                   default="{min_clearance}"/>
+      <output_port name="safe_x" default="{safe_x}"/>
+      <output_port name="safe_y" default="{safe_y}"/>
+      <output_port name="home_x" default="{home_x}"/>
+      <output_port name="home_y" default="{home_y}"/>
+      <inout_port name="idle_count" default="{idle_count}"/>
+      <inout_port name="charging" default="{charging}"/>
+    </Action>
+
+    <Action ID="Respawn" editable="true">
+      <inout_port name="new_mission" default="{new_mission}"/>
+    </Action>
+
+    <Action ID="Render" editable="true">
+      <input_port name="pos_x" default="{pos_x}"/>
+      <input_port name="pos_y" default="{pos_y}"/>
+      <input_port name="battery" default="{battery}"/>
+      <input_port name="tick_count" default="{tick_count}"/>
+    </Action>
+
+    <Action ID="SelectWaypoint" editable="true">
+      <output_port name="wp_x" default="{wp_x}"/>
+      <output_port name="wp_y" default="{wp_y}"/>
+      <inout_port name="wp_index" default="{wp_index}"/>
+      <inout_port name="wp_selected_count"
+                  default="{wp_selected_count}"/>
+    </Action>
+
+    <Action ID="PerformScan" editable="true">
+      <input_port name="pos_x" default="{pos_x}"/>
+      <input_port name="pos_y" default="{pos_y}"/>
+      <inout_port name="battery" default="{battery}"/>
+      <output_port name="scan_result" default="{scan_result}"/>
+      <inout_port name="targets_found"
+                  default="{targets_found}"/>
+      <inout_port name="scans_completed"
+                  default="{scans_completed}"/>
+      <inout_port name="mission_progress"
+                  default="{mission_progress}"/>
+      <inout_port name="scan_errors"
+                  default="{scan_errors}"/>
+    </Action>
+
+    <Action ID="CheckMetric" editable="true">
+      <input_port name="metric" default="{metric}"/>
+      <input_port name="threshold" default="{threshold}"/>
+      <input_port name="charging" default="{charging}"/>
+    </Action>
+
+    <Action ID="Charge" editable="true">
+      <inout_port name="battery" default="{battery}"/>
+      <inout_port name="charging" default="{charging}"/>
+    </Action>
+
+    <Action ID="ComputePath" editable="true">
+      <input_port name="target_x" default="{target_x}"/>
+      <input_port name="target_y" default="{target_y}"/>
+      <input_port name="pos_x" default="{pos_x}"/>
+      <input_port name="pos_y" default="{pos_y}"/>
+      <inout_port name="nav_status" default="{nav_status}"/>
+    </Action>
+
+    <Action ID="FollowPath" editable="true">
+      <inout_port name="pos_x" default="{pos_x}"/>
+      <inout_port name="pos_y" default="{pos_y}"/>
+      <inout_port name="battery" default="{battery}"/>
+      <inout_port name="nav_status" default="{nav_status}"/>
+    </Action>
+
+  </TreeNodesModel>
+</root>
