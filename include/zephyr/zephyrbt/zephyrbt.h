@@ -137,7 +137,7 @@ struct zephyrbt_context {
 	const int bb_names_count;
 	const char *lua_gen_script;
 	const char *const *lua_user_scripts;
-	const int lua_user_script_count;
+	int lua_user_script_count;
 #endif
 };
 

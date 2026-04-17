@@ -1,0 +1,57 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Robot Patrol
+  description: |
+    Advanced sample demonstrating a mobile robot that patrols
+    waypoints on an 8x8 grid using BFS pathfinding, manages
+    battery, and handles emergencies. Exercises subtrees with
+    port aliasing, Lua pre/post conditions, and 4 user Lua
+    override files. Features a live terminal UI animation.
+common:
+  tags: zephyrbt lua
+tests:
+  samples.zephyrbt.robot_patrol:
+    platform_allow:
+      - native_sim/native/64
+      - mps2/an385
+    extra_configs:
+      - CONFIG_ROBOT_PATROL_TEST_MODE=y
+      - CONFIG_LOG_DEFAULT_LEVEL=3
+      - CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL_INF=y
+    timeout: 30
+    harness: console
+    harness_config:
+      type: multi_line
+      ordered: true
+      regex:
+        # 1. Start at home with full battery
+        - "pos=\\(0,7\\) bat=100.*status=idle"
+        # 2. Navigate to W1
+        - "scan=0/4.*status=Navigating"
+        # 3. Arrive + scan W1
+        - "pos=\\(0,3\\).*status=Arrived at waypoint"
+        - "status=Searching"
+        - "scan=1/4.*status=Found"
+        # 4. Return home, head to W2
+        - "scan=1/4.*status=Heading home"
+        - "scan=1/4.*status=Navigating"
+        # 5. Scan W2
+        - "scan=2/4.*status=Found"
+        # 6. Scan W3
+        - "scan=3/4.*status=Found"
+        # 7. Scan W4 — all waypoints done
+        - "scan=4/4.*status=Found"
+        # 8. Battery emergency during return
+        - "status=Emergency: moving"
+        # 9. Charging at charger
+        - "pos=\\(0,0\\).*status=Charging"
+        - "bat=100.*status=Charging"
+        # 10. Resume patrol after charge
+        - "status=Resuming patrol"
+        # 11. Navigate home for celebration
+        - "pos=\\(0,7\\).*status=Mission 1 complete"
+        # 12. New mission starts
+        - "scan=0/4.*status=Navigating"

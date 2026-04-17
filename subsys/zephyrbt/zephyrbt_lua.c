@@ -155,9 +155,18 @@ static void zephyrbt_lua_exec(struct zephyrbt_context *ctx, int ref)
 	}
 }
 
+void __attribute__((weak)) zephyrbt_lua_user_init(struct zephyrbt_context *ctx)
+{
+	/* Override to set ctx->lua_user_scripts and
+	 * ctx->lua_user_script_count before scripts
+	 * are loaded. */
+}
+
 int zephyrbt_lua_init(struct zephyrbt_context *ctx)
 {
 	lua_State *L;
+
+	zephyrbt_lua_user_init(ctx);
 
 	L = lua_newstate(zephyrbt_lua_alloc, NULL, 0);
 	if (L == NULL) {

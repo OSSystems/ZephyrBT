@@ -1,0 +1,14 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "Robot Patrol Sample"
+
+source "Kconfig.zephyr"
+
+config ROBOT_PATROL_TEST_MODE
+	bool "Test mode (LOG_INF output instead of terminal UI)"
+	help
+	  When enabled, display_render outputs LOG_INF lines
+	  instead of the ANSI terminal UI, allowing automated
+	  testing via console harness regex matching.

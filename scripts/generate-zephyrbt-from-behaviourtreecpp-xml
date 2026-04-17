@@ -245,8 +245,9 @@ COND_TYPE_SUFFIX = {
 def get_cond_func_name(node, attr_name):
     comment = node[5]
     function = node[2]
+    idx = node[1]
     base = stringcase.snakecase(comment) if comment else function
-    return f"{base}_{COND_TYPE_SUFFIX[attr_name]}"
+    return f"{base}_{idx}_{COND_TYPE_SUFFIX[attr_name]}"
 
 
 def collect_conditions(nodes):
@@ -549,8 +550,34 @@ def addBlackboardVariables(idx_nodes_set, blackboard_set):
 
     for node in idx_nodes_set:
         blackboard = node[6]
-        if blackboard:
-            index = loadBlackboardVariables(index, str(blackboard[0][1]), blackboard_set)
+        for attr in blackboard:
+            index = loadBlackboardVariables(index, str(attr[1]), blackboard_set)
+
+
+def apply_port_mapping(elem, port_map):
+    """Apply subtree port mapping to expanded content.
+
+    Replaces:
+    - bb.port_name -> bb.variable in Lua condition scripts
+    - {port_name} -> {variable} in normal attribute values
+    """
+    for att in list(elem.attrib):
+        if att in CONDITION_ATTRS:
+            script = elem.attrib[att]
+            for port, var in port_map.items():
+                script = re.sub(
+                    rf'bb\.{re.escape(port)}(?![a-zA-Z0-9_])',
+                    f'bb.{var}', script)
+            elem.attrib[att] = script
+        else:
+            val = elem.attrib[att]
+            for port, var in port_map.items():
+                val = val.replace(
+                    '{' + port + '}',
+                    '{' + var + '}')
+            elem.attrib[att] = val
+    for child in elem:
+        apply_port_mapping(child, port_map)
 
 
 def expand_subtrees(elem, root):
@@ -558,12 +585,27 @@ def expand_subtrees(elem, root):
     Recursively expand SubTree nodes by replacing them with deep copies
     of their referenced tree content. This ensures each subtree instance
     has unique element IDs when a subtree is used multiple times.
+
+    Port mappings from SubTree attributes are applied to condition
+    scripts in the expanded content, resolving bb.port_name to
+    bb.actual_variable for each instance.
     """
     i = 0
     while i < len(elem):
         child = elem[i]
         if child.tag == 'SubTree':
             subtree_id = child.get('ID')
+
+            # Capture port mapping before expansion
+            port_map = {}
+            skip_attrs = {'ID', '_autoremap', 'name', '_description'}
+            for att in child.attrib:
+                if att in skip_attrs or att in CONDITION_ATTRS:
+                    continue
+                val = child.attrib[att]
+                if val.startswith('{') and val.endswith('}'):
+                    port_map[att] = val[1:-1]
+
             for tree in root.iter('BehaviorTree'):
                 if tree.attrib.get('ID') == subtree_id:
                     # Create a deep copy of the subtree content
@@ -574,6 +616,9 @@ def expand_subtrees(elem, root):
                     elem.insert(i, subtree_content)
                     # Recursively expand any nested subtrees in the copy
                     expand_subtrees(subtree_content, root)
+                    # Apply port mapping to condition scripts
+                    if port_map:
+                        apply_port_mapping(subtree_content, port_map)
                     break
         else:
             # Recursively process non-SubTree children
