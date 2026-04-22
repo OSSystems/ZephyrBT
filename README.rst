@@ -125,7 +125,7 @@ Examples
   samples/subsys/zephyrbt/lua_conditions/README.rst
 
 .. _Robot Patrol:
-  samples/subsys/zephyrbt/robot_patrol/README.rst
+  samples/subsys/zephyrbt/robot_patrol/README.md
 
 .. _Groot2:
   https://www.behaviortree.dev/groot/
