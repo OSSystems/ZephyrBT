@@ -90,7 +90,21 @@ Examples
 
 * The `Minimal`_ is an example how to use the ZephyrBT without any IDE.
 
-* The `Dynamic`_ uses their own thread and generate data and stubs from `Groot2`_ IDE.
+* The `Dynamic`_ uses their own thread and generate data and stubs from
+  `Groot2`_ IDE.
+
+* The `Subtree Reuse`_ validates the correct behavior tree traversal when a
+  subtree is used multiple times.
+
+* The `Port Alias`_ validates the correct behavior when multiple instances of
+  same leaf exists and defines a blackboard variable.
+
+* The `Lua Conditions`_ demonstrates pre/post conditions on behaviour tree nodes
+  using Lua scripts
+
+* The `Robot Patrol`_ is an advanced sample which demonstrate a ROS-like mobile
+  robot that patrols waypoints on an 8x8 grid world with a live terminal UI
+  animation.
 
 .. _Tutorial:
   samples/subsys/zephyrbt/tutorial/README.rst
@@ -100,6 +114,18 @@ Examples
 
 .. _Dynamic:
   samples/subsys/zephyrbt/dynamic/README.rst
+
+.. _Subtree Reuse:
+  samples/subsys/zephyrbt/subtree_reuse/README.rst
+
+.. _Port Alias:
+  samples/subsys/zephyrbt/port_alias/README.rst
+
+.. _Lua Conditions:
+  samples/subsys/zephyrbt/lua_conditions/README.rst
+
+.. _Robot Patrol:
+  samples/subsys/zephyrbt/robot_patrol/README.rst
 
 .. _Groot2:
   https://www.behaviortree.dev/groot/
