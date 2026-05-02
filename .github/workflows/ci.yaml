@@ -7,6 +7,10 @@ on:
     branches:
       - master
       - 'releases/**'
+  schedule:
+    # Nightly build at 05:00 UTC (02:00 BRT).
+    - cron: '0 5 * * *'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.repository }}-${{ github.workflow }}
