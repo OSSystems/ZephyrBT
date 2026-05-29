@@ -1,0 +1,146 @@
+name: "Sync main-next"
+
+on:
+  schedule:
+    # Daily at 04:00 UTC (01:00 BRT), before the master nightly CI.
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  checks: write
+
+concurrency:
+  group: ${{ github.repository }}-sync-main-next
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      do_sync:       ${{ steps.plan.outputs.do_sync }}
+      candidate_sha: ${{ steps.plan.outputs.candidate_sha }}
+      zephyr_short:  ${{ steps.plan.outputs.zephyr_short }}
+      lua_short:     ${{ steps.plan.outputs.lua_short }}
+    steps:
+      - name: Resolve upstream main HEADs
+        id: upstream
+        run: |
+          set -euo pipefail
+          ZEPHYR_SHA=$(git ls-remote https://github.com/zephyrproject-rtos/zephyr main | cut -f1)
+          LUA_SHA=$(git ls-remote https://github.com/rodrigopex/lua_zephyr main | cut -f1)
+          if [ -z "$ZEPHYR_SHA" ] || [ -z "$LUA_SHA" ]; then
+            echo "Could not resolve upstream HEADs — aborting"
+            exit 1
+          fi
+          echo "zephyr_sha=$ZEPHYR_SHA" >> "$GITHUB_OUTPUT"
+          echo "lua_sha=$LUA_SHA"       >> "$GITHUB_OUTPUT"
+
+      - name: Checkout master (full history)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Plan and push candidate branch
+        id: plan
+        env:
+          ZEPHYR_SHA: ${{ steps.upstream.outputs.zephyr_sha }}
+          LUA_SHA:    ${{ steps.upstream.outputs.lua_sha }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin master main-next || git fetch origin master
+
+          ZEPHYR_SHORT="${ZEPHYR_SHA:0:8}"
+          LUA_SHORT="${LUA_SHA:0:8}"
+
+          # Build the candidate from master with both deps pinned. The sed is
+          # anchored per project block; 'revision: .*' matches whether the
+          # current value is the floating 'main' or a previous 40-char SHA.
+          # '- name: zephyr$' (end-anchored) does not match '- name: lua_zephyr'.
+          git checkout -B sync-candidate origin/master
+          sed -i "/- name: zephyr$/,/revision:/ s|revision: .*|revision: $ZEPHYR_SHA # main|" west.yml
+          sed -i "/- name: lua_zephyr$/,/revision:/ s|revision: .*|revision: $LUA_SHA # main|" west.yml
+
+          # Skip if main-next already pins exactly these SHAs.
+          NEW_WEST=$(cat west.yml)
+          CUR_WEST=$(git show origin/main-next:west.yml 2>/dev/null || true)
+          if [ -n "$CUR_WEST" ] && [ "$NEW_WEST" = "$CUR_WEST" ]; then
+            echo "main-next already pins Z $ZEPHYR_SHORT / LUA $LUA_SHORT — nothing to do"
+            echo "do_sync=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git add west.yml
+          git -c commit.gpgsign=false commit \
+            -m "west.yml: Sync Z $ZEPHYR_SHORT / LUA $LUA_SHORT"
+          CANDIDATE_SHA=$(git rev-parse HEAD)
+          git push origin sync-candidate --force
+
+          echo "do_sync=true"                   >> "$GITHUB_OUTPUT"
+          echo "candidate_sha=$CANDIDATE_SHA"    >> "$GITHUB_OUTPUT"
+          echo "zephyr_short=$ZEPHYR_SHORT"      >> "$GITHUB_OUTPUT"
+          echo "lua_short=$LUA_SHORT"            >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: prepare
+    if: needs.prepare.outputs.do_sync == 'true'
+    uses: ./.github/workflows/ci.yaml
+    with:
+      ref: ${{ needs.prepare.outputs.candidate_sha }}
+    secrets: inherit
+
+  promote:
+    needs: [prepare, test]
+    if: |
+      always() &&
+      needs.prepare.outputs.do_sync == 'true' &&
+      needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      CANDIDATE_SHA: ${{ needs.prepare.outputs.candidate_sha }}
+      ZEPHYR_SHORT:  ${{ needs.prepare.outputs.zephyr_short }}
+      LUA_SHORT:     ${{ needs.prepare.outputs.lua_short }}
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.candidate_sha }}
+          fetch-depth: 0
+
+      - name: Promote candidate to main-next and clean up
+        run: |
+          set -euo pipefail
+          git push origin "$CANDIDATE_SHA:refs/heads/main-next" --force
+          git push origin --delete sync-candidate || true
+          git push origin --delete sync-broken    || true
+          echo "main-next updated to Z $ZEPHYR_SHORT / LUA $LUA_SHORT (sha $CANDIDATE_SHA)"
+
+  quarantine:
+    needs: [prepare, test]
+    if: |
+      always() &&
+      needs.prepare.outputs.do_sync == 'true' &&
+      needs.test.result == 'failure'
+    runs-on: ubuntu-latest
+    env:
+      CANDIDATE_SHA: ${{ needs.prepare.outputs.candidate_sha }}
+      ZEPHYR_SHORT:  ${{ needs.prepare.outputs.zephyr_short }}
+      LUA_SHORT:     ${{ needs.prepare.outputs.lua_short }}
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.candidate_sha }}
+          fetch-depth: 0
+
+      - name: Quarantine broken candidate (main-next untouched)
+        run: |
+          set -euo pipefail
+          # Overwrite the single broken branch; keeps exactly one.
+          git push origin "$CANDIDATE_SHA:refs/heads/sync-broken" --force
+          git push origin --delete sync-candidate || true
+          echo "Build failed for Z $ZEPHYR_SHORT / LUA $LUA_SHORT — kept on sync-broken; main-next unchanged"
