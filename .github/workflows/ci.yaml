@@ -11,6 +11,13 @@ on:
     # Nightly build at 05:00 UTC (02:00 BRT).
     - cron: '0 5 * * *'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Commit SHA / ref to build (defaults to the triggering ref)"
+        type: string
+        required: false
+        default: ""
 
 concurrency:
   group: ${{ github.repository }}-${{ github.workflow }}
@@ -23,6 +30,8 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
       - uses: nixbuild/nix-quick-install-action@v34
       - id: set-matrix
         name: Generate Nix Matrix
@@ -41,6 +50,8 @@ jobs:
       matrix: ${{ fromJSON(needs.nix-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
       - uses: nixbuild/nix-quick-install-action@v34
       - name: Restore and cache Nix store
         uses: nix-community/cache-nix-action@v7
@@ -55,6 +66,8 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
       - uses: nixbuild/nix-quick-install-action@v34
       - name: Restore and cache Nix store
         uses: nix-community/cache-nix-action@v7
