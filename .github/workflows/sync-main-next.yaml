@@ -37,7 +37,7 @@ jobs:
           echo "lua_sha=$LUA_SHA"       >> "$GITHUB_OUTPUT"
 
       - name: Checkout master (full history)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: master
@@ -106,7 +106,7 @@ jobs:
       LUA_SHORT:     ${{ needs.prepare.outputs.lua_short }}
     steps:
       - name: Checkout candidate
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.candidate_sha }}
           fetch-depth: 0
@@ -132,7 +132,7 @@ jobs:
       LUA_SHORT:     ${{ needs.prepare.outputs.lua_short }}
     steps:
       - name: Checkout candidate
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.candidate_sha }}
           fetch-depth: 0
