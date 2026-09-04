@@ -11,7 +11,9 @@ sample:
     port aliasing, Lua pre/post conditions, and 4 user Lua
     override files. Features a live terminal UI animation.
 common:
-  tags: zephyrbt lua
+  tags:
+    - zephyrbt
+    - lua
 tests:
   samples.zephyrbt.robot_patrol:
     platform_allow:
