@@ -9,7 +9,9 @@ sample:
     behaviour tree nodes. Exercises _skipIf, _successIf,
     _failureIf, _onSuccess, _onFailure, and _post conditions.
 common:
-  tags: zephyrbt lua
+  tags:
+    - zephyrbt
+    - lua
 tests:
   samples.zephyrbt.lua_conditions:
     platform_allow:
