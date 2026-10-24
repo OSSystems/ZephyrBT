@@ -17,7 +17,7 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: main
+      revision: 2a9e8ac155a3f2fd85d4559753be86a47b44ccf0 # main
       import:
         path-prefix: deps
         path-allowlist:
@@ -25,7 +25,7 @@ manifest:
           - modules/hal/stm32
     - name: lua_zephyr
       remote: rodrigopex
-      revision: main
+      revision: 66fc52fdf36a5c8c9e30addf0b829be3714f3c48 # main
       path: deps/modules/lib/lua_zephyr
       submodules: true
 
