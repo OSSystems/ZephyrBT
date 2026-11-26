@@ -1,0 +1,23 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Timeout Halt
+  description: |
+    Regression test: the tree leaves a running Timeout and comes back
+    to it later. The Timeout must start a new deadline.
+common:
+  tags:
+    - zephyrbt
+tests:
+  samples.zephyrbt.timeout_halt:
+    platform_allow:
+      - qemu_cortex_m3
+      - native_sim/native/64
+    timeout: 30
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "I: Timeout restarted: [0-9]+ ms"
