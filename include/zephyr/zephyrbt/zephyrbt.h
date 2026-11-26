@@ -333,6 +333,7 @@ enum zephyrbt_child_status zephyrbt_lua_pre_check(struct zephyrbt_context *ctx,
 void zephyrbt_lua_post_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self,
 			     enum zephyrbt_child_status status);
 bool zephyrbt_lua_while_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+void zephyrbt_lua_on_halted(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
 #endif
 
 #ifdef __cplusplus

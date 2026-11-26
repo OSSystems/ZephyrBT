@@ -138,6 +138,10 @@ void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
 	if (self->halt != NULL) {
 		self->halt(ctx, self);
 	}
+
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS)
+	zephyrbt_lua_on_halted(ctx, self);
+#endif
 }
 
 void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
