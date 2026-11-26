@@ -15,7 +15,7 @@ struct zephyrbt_decorator_delay_context {
 };
 
 enum zephyrbt_child_status zephyrbt_decorator_delay_init(struct zephyrbt_context *ctx,
-							 struct zephyrbt_node *self)
+							 const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("init: %s", self->name);
@@ -24,7 +24,7 @@ enum zephyrbt_child_status zephyrbt_decorator_delay_init(struct zephyrbt_context
 	struct zephyrbt_decorator_delay_context *delay;
 
 	delay = k_malloc(sizeof(struct zephyrbt_decorator_delay_context));
-	self->ctx = delay;
+	zephyrbt_node_ctx_set(ctx, self, delay);
 
 	if (delay == NULL) {
 		LOG_ERR("Context can not be allocate.");
@@ -45,14 +45,14 @@ enum zephyrbt_child_status zephyrbt_decorator_delay_init(struct zephyrbt_context
 }
 
 enum zephyrbt_child_status zephyrbt_decorator_delay(struct zephyrbt_context *ctx,
-						    struct zephyrbt_node *self)
+						    const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
 #endif
 
 	struct zephyrbt_decorator_delay_context *delay;
-	delay = (struct zephyrbt_decorator_delay_context *)self->ctx;
+	delay = (struct zephyrbt_decorator_delay_context *)zephyrbt_node_ctx_get(ctx, self);
 
 	if (delay == NULL) {
 		LOG_ERR("Undefined behaviour on zephyrbt_decorator_delay.");

@@ -148,15 +148,15 @@ def write_zephyrbt_function_prototypes(f, nodes, user_file):
 
         fname = f"zephyrbt_{model}_{function}("
         f.write(f"enum zephyrbt_child_status\n{fname}struct zephyrbt_context *ctx,\n")
-        f.write(f"{gen_align(fname)}struct zephyrbt_node *self);\n\n")
+        f.write(f"{gen_align(fname)}const struct zephyrbt_node *self);\n\n")
 
         fname = f"zephyrbt_{model}_{function}_init("
         f.write(f"enum zephyrbt_child_status\n{fname}struct zephyrbt_context *ctx,\n")
-        f.write(f"{gen_align(fname)}struct zephyrbt_node *self);\n\n")
+        f.write(f"{gen_align(fname)}const struct zephyrbt_node *self);\n\n")
 
         fname = f"zephyrbt_{model}_{function}_halt("
         f.write(f"void\n{fname}struct zephyrbt_context *ctx,\n")
-        f.write(f"{gen_align(fname)}struct zephyrbt_node *self);\n\n")
+        f.write(f"{gen_align(fname)}const struct zephyrbt_node *self);\n\n")
 
 
 def write_zephyrbt_custom_function(f, nodes):
@@ -164,27 +164,27 @@ def write_zephyrbt_custom_function(f, nodes):
         fname = f"zephyrbt_{model}_{function}("
         f.write(f"\nenum zephyrbt_child_status __attribute__((weak))")
         f.write(f"\n{fname}struct zephyrbt_context *ctx,\n")
-        f.write(f"{gen_align(fname)}struct zephyrbt_node *self)\n{{\n")
+        f.write(f"{gen_align(fname)}const struct zephyrbt_node *self)\n{{\n")
         f.write(f"\tLOG_DBG(\"{fname[:-1]} stub function\");\n");
         f.write(f"\treturn ZEPHYRBT_CHILD_SUCCESS_STATUS;\n");
         f.write(f"}}\n");
         fname = f"{fname[0:-1]}_init("
         f.write(f"\nenum zephyrbt_child_status __attribute__((weak))")
         f.write(f"\n{fname}struct zephyrbt_context *ctx,\n")
-        f.write(f"{gen_align(fname)}struct zephyrbt_node *self)\n{{\n")
+        f.write(f"{gen_align(fname)}const struct zephyrbt_node *self)\n{{\n")
         f.write(f"\tLOG_DBG(\"{fname[:-1]} stub function\");\n");
         f.write(f"\treturn ZEPHYRBT_CHILD_SUCCESS_STATUS;\n");
         f.write(f"}}\n");
         fname = f"{fname[0:-len('_init(')]}_halt("
         f.write(f"\nvoid __attribute__((weak))")
         f.write(f"\n{fname}struct zephyrbt_context *ctx,\n")
-        f.write(f"{gen_align(fname)}struct zephyrbt_node *self)\n{{\n")
+        f.write(f"{gen_align(fname)}const struct zephyrbt_node *self)\n{{\n")
         f.write(f"\tLOG_DBG(\"{fname[:-1]} stub function\");\n");
         f.write(f"}}\n");
 
 
 def write_zephyrbt_nodes_table(f, nodes, builtin, bt, name):
-    f.write(f"\nstatic struct zephyrbt_node {name}[] = {{")
+    f.write(f"\nstatic const struct zephyrbt_node {name}[] = {{")
     for node, child, sibling in bt:
         _, num, function, model, custom, comment, attribs, conds = node
         s_idx = sibling[1] if sibling is not None else -1
@@ -384,6 +384,7 @@ def generate_files(filename, output_inc, output_data, output_stub, builtin,
         f.write(f"\n#include \"{filename}_gen_lua_script.h\"")
         write_zephyrbt_lua_cond_data(f, nodes, blackboard, filename)
         f.write(f"#endif\n")
+        f.write(f"\nZEPHYRBT_NODE_DATA_DEFINE({filename}, ARRAY_SIZE({filename}_nodes));\n")
         f.write(f"\nZEPHYRBT_DEFINE({filename}, {filename}_nodes, ")
         f.write(f"{stack}, {prio}, {'true' if thread_yield == 1 else 'false'}, NULL, {filename}_blackboard);\n")
 

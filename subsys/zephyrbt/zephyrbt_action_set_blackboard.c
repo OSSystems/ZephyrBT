@@ -15,7 +15,7 @@ struct zephyrbt_action_set_blackboard_context {
 };
 
 enum zephyrbt_child_status zephyrbt_action_set_blackboard_init(struct zephyrbt_context *ctx,
-							       struct zephyrbt_node *self)
+							       const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("init: %s", self->name);
@@ -24,7 +24,7 @@ enum zephyrbt_child_status zephyrbt_action_set_blackboard_init(struct zephyrbt_c
 	struct zephyrbt_action_set_blackboard_context *set_blackboard;
 
 	set_blackboard = k_malloc(sizeof(struct zephyrbt_action_set_blackboard_context));
-	self->ctx = set_blackboard;
+	zephyrbt_node_ctx_set(ctx, self, set_blackboard);
 
 	if (set_blackboard == NULL) {
 		LOG_ERR("Context can not be allocate.");
@@ -53,14 +53,15 @@ enum zephyrbt_child_status zephyrbt_action_set_blackboard_init(struct zephyrbt_c
 }
 
 enum zephyrbt_child_status zephyrbt_action_set_blackboard(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
 #endif
 
 	struct zephyrbt_action_set_blackboard_context *set_blackboard;
-	set_blackboard = (struct zephyrbt_action_set_blackboard_context *)self->ctx;
+	set_blackboard =
+		(struct zephyrbt_action_set_blackboard_context *)zephyrbt_node_ctx_get(ctx, self);
 
 	if (set_blackboard == NULL) {
 		LOG_ERR("Undefined behaviour on zephyrbt_action_set_blackboard.");

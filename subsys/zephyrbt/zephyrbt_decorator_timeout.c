@@ -29,7 +29,7 @@ static void zephyrbt_decorator_timeout_callback(struct k_timer *tick_tmr)
 }
 
 enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_context *ctx,
-							   struct zephyrbt_node *self)
+							   const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("init: %s", self->name);
@@ -38,7 +38,7 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_conte
 	struct zephyrbt_decorator_timeout_context *timeout;
 
 	timeout = k_malloc(sizeof(struct zephyrbt_decorator_timeout_context));
-	self->ctx = timeout;
+	zephyrbt_node_ctx_set(ctx, self, timeout);
 
 	if (timeout == NULL) {
 		LOG_ERR("Context can not be allocate.");
@@ -62,14 +62,14 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_conte
 }
 
 enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *ctx,
-						      struct zephyrbt_node *self)
+						      const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
 #endif
 
 	struct zephyrbt_decorator_timeout_context *timeout;
-	timeout = (struct zephyrbt_decorator_timeout_context *)self->ctx;
+	timeout = (struct zephyrbt_decorator_timeout_context *)zephyrbt_node_ctx_get(ctx, self);
 
 	if (timeout == NULL) {
 		LOG_ERR("Undefined behaviour on zephyrbt_decorator_timeout.");
@@ -106,10 +106,10 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
  * next run starts a new deadline, as TimeoutNode::halt() does in
  * BehaviorTree.CPP.
  */
-void zephyrbt_decorator_timeout_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+void zephyrbt_decorator_timeout_halt(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
 	struct zephyrbt_decorator_timeout_context *timeout;
-	timeout = (struct zephyrbt_decorator_timeout_context *)self->ctx;
+	timeout = (struct zephyrbt_decorator_timeout_context *)zephyrbt_node_ctx_get(ctx, self);
 
 	if (timeout == NULL) {
 		return;

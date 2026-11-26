@@ -11,7 +11,7 @@
 LOG_MODULE_REGISTER(zephyrbt_decorator_inverter, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
 
 enum zephyrbt_child_status zephyrbt_decorator_inverter(struct zephyrbt_context *ctx,
-						       struct zephyrbt_node *self)
+						       const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("init: %s", self->name);

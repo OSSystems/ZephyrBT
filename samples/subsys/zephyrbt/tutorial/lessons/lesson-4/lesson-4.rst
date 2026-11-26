@@ -24,7 +24,7 @@ that require access to user global context can do it.
 
         enum zephyrbt_child_status
         zephyrbt_action_<my_first_action>_init(struct zephyrbt_context *ctx,
-                                               struct zephyrbt_node *self)
+                                               const struct zephyrbt_node *self)
         {
                 struct <my global ctx type> *data;
 

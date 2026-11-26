@@ -44,7 +44,7 @@ struct scan_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_perform_scan_init(struct zephyrbt_context *ctx,
-							     struct zephyrbt_node *self)
+							     const struct zephyrbt_node *self)
 {
 	struct scan_ctx *c = k_malloc(sizeof(*c));
 
@@ -71,14 +71,14 @@ enum zephyrbt_child_status zephyrbt_action_perform_scan_init(struct zephyrbt_con
 	c->last_px = -1;
 	c->last_py = -1;
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_perform_scan(struct zephyrbt_context *ctx,
-							struct zephyrbt_node *self)
+							const struct zephyrbt_node *self)
 {
-	struct scan_ctx *c = (struct scan_ctx *)self->ctx;
+	struct scan_ctx *c = (struct scan_ctx *)zephyrbt_node_ctx_get(ctx, self);
 	struct robot_state *s = robot_get_state();
 	int px = (intptr_t)c->pos_x->item;
 	int py = (intptr_t)c->pos_y->item;

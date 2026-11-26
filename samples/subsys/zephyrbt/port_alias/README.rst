@@ -37,7 +37,8 @@ item and the two values evolve independently.
 
 The sample also exercises the ``CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT``
 optimisation: the ``_init`` callback caches the resolved blackboard item
-pointer in ``self->ctx`` so the tick path avoids a runtime search.
+pointer in the node context (``zephyrbt_node_ctx_set()``) so the tick path
+avoids a runtime search.
 
 .. _GitHub issue #40: https://github.com/OSSystems/ZephyrBT/issues/40
 

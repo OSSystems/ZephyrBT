@@ -15,7 +15,7 @@ LOG_MODULE_REGISTER(global_ctx, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
 #include "tutorial.h"
 
 enum zephyrbt_child_status zephyrbt_action_init_tree_init(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 	struct tutorial_context *global_ctx;
 

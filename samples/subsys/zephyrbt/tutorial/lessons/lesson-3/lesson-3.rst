@@ -52,12 +52,12 @@ the Open and Close actions.
 
         enum zephyrbt_child_status
         zephyrbt_action_open_init(struct zephyrbt_context *ctx,
-                                struct zephyrbt_node *self)
+                                const struct zephyrbt_node *self)
         {
                 struct zephyrbt_action_fridge_context *fridge_ctx;
 
                 fridge_ctx = k_malloc(sizeof(struct zephyrbt_action_fridge_context));
-                self->ctx = fridge_ctx;
+                zephyrbt_node_ctx_set(ctx, self, fridge_ctx);
 
                 if (fridge_ctx == NULL) {
                         LOG_ERR("Context can not be allocate. Need more memory!!");
@@ -80,12 +80,12 @@ the Open and Close actions.
 
         enum zephyrbt_child_status
         zephyrbt_action_close_init(struct zephyrbt_context *ctx,
-                                struct zephyrbt_node *self)
+                                const struct zephyrbt_node *self)
         {
                 struct zephyrbt_action_fridge_context *fridge_ctx;
 
                 fridge_ctx = k_malloc(sizeof(struct zephyrbt_action_fridge_context));
-                self->ctx = fridge_ctx;
+                zephyrbt_node_ctx_set(ctx, self, fridge_ctx);
 
                 if (fridge_ctx == NULL) {
                         LOG_ERR("Context can not be allocate. Need more memory!!");
@@ -108,10 +108,10 @@ the Open and Close actions.
 
         enum zephyrbt_child_status
         zephyrbt_action_open(struct zephyrbt_context *ctx,
-                        struct zephyrbt_node *self)
+                        const struct zephyrbt_node *self)
         {
                 struct zephyrbt_action_fridge_context *fridge_ctx;
-                fridge_ctx = (struct zephyrbt_action_fridge_context *)self->ctx;
+                fridge_ctx = (struct zephyrbt_action_fridge_context *)zephyrbt_node_ctx_get(ctx, self);
 
                 if (fridge_ctx->is_open->item == (zephyrbt_node_context_t) true) {
                         LOG_DBG("Fridge is already open, let's skip...");
@@ -127,10 +127,10 @@ the Open and Close actions.
 
         enum zephyrbt_child_status
         zephyrbt_action_close(struct zephyrbt_context *ctx,
-                        struct zephyrbt_node *self)
+                        const struct zephyrbt_node *self)
         {
                 struct zephyrbt_action_fridge_context *fridge_ctx;
-                fridge_ctx = (struct zephyrbt_action_fridge_context *)self->ctx;
+                fridge_ctx = (struct zephyrbt_action_fridge_context *)zephyrbt_node_ctx_get(ctx, self);
 
                 if (fridge_ctx->is_open->item == (zephyrbt_node_context_t) false) {
                         LOG_DBG("Fridge is already closed, let's skip...");

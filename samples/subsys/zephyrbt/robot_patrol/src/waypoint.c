@@ -21,7 +21,7 @@ struct select_wp_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_select_waypoint_init(struct zephyrbt_context *ctx,
-								struct zephyrbt_node *self)
+								const struct zephyrbt_node *self)
 {
 	struct select_wp_ctx *c = k_malloc(sizeof(*c));
 
@@ -41,14 +41,14 @@ enum zephyrbt_child_status zephyrbt_action_select_waypoint_init(struct zephyrbt_
 	c->wp_y->item = (zephyrbt_node_context_t)(intptr_t)-1;
 	c->wp_index->item = (zephyrbt_node_context_t)0;
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_select_waypoint(struct zephyrbt_context *ctx,
-							   struct zephyrbt_node *self)
+							   const struct zephyrbt_node *self)
 {
-	struct select_wp_ctx *c = (struct select_wp_ctx *)self->ctx;
+	struct select_wp_ctx *c = (struct select_wp_ctx *)zephyrbt_node_ctx_get(ctx, self);
 	struct robot_state *s = robot_get_state();
 
 	int idx = (intptr_t)c->wp_index->item;

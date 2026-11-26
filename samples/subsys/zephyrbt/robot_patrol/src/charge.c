@@ -34,7 +34,7 @@ struct charge_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_charge_init(struct zephyrbt_context *ctx,
-						       struct zephyrbt_node *self)
+						       const struct zephyrbt_node *self)
 {
 	struct charge_ctx *c = k_malloc(sizeof(*c));
 
@@ -49,14 +49,14 @@ enum zephyrbt_child_status zephyrbt_action_charge_init(struct zephyrbt_context *
 
 	c->charge_ticks = 0;
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_charge(struct zephyrbt_context *ctx,
-						  struct zephyrbt_node *self)
+						  const struct zephyrbt_node *self)
 {
-	struct charge_ctx *c = (struct charge_ctx *)self->ctx;
+	struct charge_ctx *c = (struct charge_ctx *)zephyrbt_node_ctx_get(ctx, self);
 	struct robot_state *rs = robot_get_state();
 
 	intptr_t bat = (intptr_t)c->battery->item;

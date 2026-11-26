@@ -170,7 +170,7 @@ struct compute_path_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_compute_path_init(struct zephyrbt_context *ctx,
-							     struct zephyrbt_node *self)
+							     const struct zephyrbt_node *self)
 {
 	struct compute_path_ctx *c = k_malloc(sizeof(*c));
 
@@ -189,14 +189,14 @@ enum zephyrbt_child_status zephyrbt_action_compute_path_init(struct zephyrbt_con
 	c->nav_status = zephyrbt_search_blackboard(ctx, self->index,
 						   ZEPHYRBT_COMPUTE_PATH_ATTRIBUTE_NAV_STATUS);
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_compute_path(struct zephyrbt_context *ctx,
-							struct zephyrbt_node *self)
+							const struct zephyrbt_node *self)
 {
-	struct compute_path_ctx *c = (struct compute_path_ctx *)self->ctx;
+	struct compute_path_ctx *c = (struct compute_path_ctx *)zephyrbt_node_ctx_get(ctx, self);
 	struct robot_state *s = robot_get_state();
 
 	int fx = (intptr_t)c->pos_x->item;
@@ -239,7 +239,7 @@ struct follow_path_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_follow_path_init(struct zephyrbt_context *ctx,
-							    struct zephyrbt_node *self)
+							    const struct zephyrbt_node *self)
 {
 	struct follow_path_ctx *c = k_malloc(sizeof(*c));
 
@@ -256,14 +256,14 @@ enum zephyrbt_child_status zephyrbt_action_follow_path_init(struct zephyrbt_cont
 	c->nav_status = zephyrbt_search_blackboard(ctx, self->index,
 						   ZEPHYRBT_FOLLOW_PATH_ATTRIBUTE_NAV_STATUS);
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_follow_path(struct zephyrbt_context *ctx,
-						       struct zephyrbt_node *self)
+						       const struct zephyrbt_node *self)
 {
-	struct follow_path_ctx *c = (struct follow_path_ctx *)self->ctx;
+	struct follow_path_ctx *c = (struct follow_path_ctx *)zephyrbt_node_ctx_get(ctx, self);
 
 	struct robot_path *p = get_nav_path(c->nav_status);
 

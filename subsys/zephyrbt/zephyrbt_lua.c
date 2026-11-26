@@ -233,7 +233,7 @@ int zephyrbt_lua_init(struct zephyrbt_context *ctx)
 	return 0;
 }
 
-bool zephyrbt_lua_while_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+bool zephyrbt_lua_while_check(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
 	struct zephyrbt_node_conditions *c = &ctx->conditions[self->index];
 
@@ -245,7 +245,7 @@ bool zephyrbt_lua_while_check(struct zephyrbt_context *ctx, struct zephyrbt_node
 }
 
 enum zephyrbt_child_status zephyrbt_lua_pre_check(struct zephyrbt_context *ctx,
-						  struct zephyrbt_node *self)
+						  const struct zephyrbt_node *self)
 {
 	struct zephyrbt_node_conditions *c = &ctx->conditions[self->index];
 
@@ -276,7 +276,7 @@ enum zephyrbt_child_status zephyrbt_lua_pre_check(struct zephyrbt_context *ctx,
 	return ZEPHYRBT_CHILD_RUNNING_STATUS;
 }
 
-void zephyrbt_lua_on_halted(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+void zephyrbt_lua_on_halted(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
 	struct zephyrbt_node_conditions *c = &ctx->conditions[self->index];
 
@@ -285,7 +285,7 @@ void zephyrbt_lua_on_halted(struct zephyrbt_context *ctx, struct zephyrbt_node *
 	}
 }
 
-void zephyrbt_lua_post_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self,
+void zephyrbt_lua_post_check(struct zephyrbt_context *ctx, const struct zephyrbt_node *self,
 			     enum zephyrbt_child_status status)
 {
 	struct zephyrbt_node_conditions *c = &ctx->conditions[self->index];

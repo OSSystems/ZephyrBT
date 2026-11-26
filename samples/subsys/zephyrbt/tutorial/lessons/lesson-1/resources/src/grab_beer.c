@@ -13,7 +13,7 @@
 LOG_MODULE_REGISTER(grab_beer, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
 
 enum zephyrbt_child_status zephyrbt_action_grab_beer(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self)
+						     const struct zephyrbt_node *self)
 {
 	static int count = 0;
 

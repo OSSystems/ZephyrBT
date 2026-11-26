@@ -14,7 +14,7 @@ LOG_MODULE_REGISTER(zbt_minimal, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
 
 // clang-format off
 
-static struct zephyrbt_node zbt_minimal_nodes[] = {
+static const struct zephyrbt_node zbt_minimal_nodes[] = {
 	{
 		.function=zephyrbt_action_always_success,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INIT, (
@@ -173,9 +173,14 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 	},
 };
 
+ZEPHYRBT_NODE_DATA_DEFINE(zbt_minimal, ARRAY_SIZE(zbt_minimal_nodes));
+
 static struct zephyrbt_context zbt_minimal_ctx = {
     .node       = zbt_minimal_nodes,
     .nodes      = ARRAY_SIZE(zbt_minimal_nodes),
+    IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT, (
+        .running = zbt_minimal_running,
+    ))
     .blackboard = NULL,
 };
 
