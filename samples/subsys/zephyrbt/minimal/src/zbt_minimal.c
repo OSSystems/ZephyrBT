@@ -192,4 +192,8 @@ static void zbt_minimal_thread(void *, void *, void *)
 	}
 }
 
+/*
+ * codechecker_false_positive [misc-misplaced-const]
+ * the const comes from k_tid_t in K_THREAD_DEFINE()
+ */
 K_THREAD_DEFINE(zbt_minimal, 512, zbt_minimal_thread, NULL, NULL, NULL, 0, 0, 0);
