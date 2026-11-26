@@ -1,0 +1,25 @@
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: Zephyr Behaviour Tree - Halt
+  description: |
+    The tree halts the running nodes that it leaves. Checks that the
+    halt function of a user node runs once, that a node halts after
+    its children, and that the Lua _onHalted condition runs.
+common:
+  tags:
+    - zephyrbt
+    - lua
+tests:
+  samples.zephyrbt.halt:
+    platform_allow:
+      - native_sim/native/64
+      - mps2/an385
+    timeout: 30
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "I: halt result: work=1 order=1"

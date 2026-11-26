@@ -106,6 +106,14 @@ Examples
   robot that patrols waypoints on an 8x8 grid world with a live terminal UI
   animation.
 
+* The `Halt`_ demonstrates how the tree halts the running nodes that it
+  leaves, with a halt function of a user node and the Lua ``_onHalted``
+  condition.
+
+* The `Timeout Halt`_ is a regression test: the tree leaves a running
+  ``Timeout`` and comes back to it later, and the ``Timeout`` starts a new
+  deadline.
+
 .. _Tutorial:
   samples/subsys/zephyrbt/tutorial/README.rst
 
@@ -126,6 +134,12 @@ Examples
 
 .. _Robot Patrol:
   samples/subsys/zephyrbt/robot_patrol/README.md
+
+.. _Halt:
+  samples/subsys/zephyrbt/halt/README.rst
+
+.. _Timeout Halt:
+  samples/subsys/zephyrbt/timeout_halt/README.rst
 
 .. _Groot2:
   https://www.behaviortree.dev/groot/

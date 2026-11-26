@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="Halt">
+  <BehaviorTree ID="Halt">
+    <Delay delay_msec="10">
+      <Fallback>
+        <Sequence>
+          <GateOpen/>
+          <!--
+            When the gate closes, the Sequence halts the Timeout, and the
+            Timeout halts Work first. Thus, when _onHalted of the Timeout
+            runs, the halt function of Work already counted its halt.
+          -->
+          <Timeout msec="10000"
+                   _onHalted="bb.order = bb.work_halts">
+            <Work work_halts="{work_halts}"/>
+          </Timeout>
+        </Sequence>
+        <Report work_halts="{work_halts}"
+                order="{order}"/>
+      </Fallback>
+    </Delay>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Condition ID="GateOpen"
+               editable="true"/>
+    <Action ID="Report"
+            editable="true">
+      <input_port name="work_halts"
+                  default="{work_halts}"/>
+      <input_port name="order"
+                  default="{order}"/>
+    </Action>
+    <Action ID="Work"
+            editable="true">
+      <inout_port name="work_halts"
+                  default="{work_halts}"/>
+    </Action>
+  </TreeNodesModel>
+</root>
