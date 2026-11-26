@@ -60,9 +60,27 @@ config ZEPHYR_BEHAVIOUR_TREE_NODE_INIT
 config ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
 	bool "Generate node context storage"
 	depends on ZEPHYR_BEHAVIOUR_TREE_NODE_INIT
+	# The built-in nodes that keep a context, as Timeout, must be halted.
+	select ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
 	help
 	  The node context storage functions are available to user when the
 	  node initialization is available.
+
+config ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
+	bool "Halt the running nodes that the tree leaves"
+	default y
+	help
+	  The tree is evaluated again from the root on each tick. A node that
+	  returned RUNNING can thus be left by the tree: an earlier child of
+	  its parent stops the evaluation, or the parent completes. The tree
+	  then halts the node, as halt() does in BehaviorTree.CPP: it calls
+	  the halt function of each running node of the subtree, from the
+	  leaves to the node, so that the nodes can drop the state of the
+	  earlier run. The generator adds a weak halt function for each user
+	  node, zephyrbt_<type>_<name>_halt(), which the application can
+	  override.
+
+	  This adds a halt function pointer and a running flag to each node.
 
 config ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
 	bool "Enable Lua scripted pre/post conditions"
