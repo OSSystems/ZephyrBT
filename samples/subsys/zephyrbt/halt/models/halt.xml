@@ -7,9 +7,10 @@
         <Sequence>
           <GateOpen/>
           <!--
-            When the gate closes, the Sequence halts the Timeout, and the
-            Timeout halts Work first. Thus, when _onHalted of the Timeout
-            runs, the halt function of Work already counted its halt.
+            When the gate closes, the Sequence halts the Timeout: the Timeout
+            stops its timer, and then Work halts. _onHalted of the Timeout
+            runs after that, so the halt function of Work already counted
+            its halt.
           -->
           <Timeout msec="10000"
                    _onHalted="bb.order = bb.work_halts">

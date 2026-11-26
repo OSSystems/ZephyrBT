@@ -132,14 +132,23 @@ void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
 
 	self->running = false;
 
-	/* Halt the subtree first, so that a node halts after its children. */
-	zephyrbt_halt_children(ctx, self);
-
+	/*
+	 * Halt the node before its children, so that the node stops its own
+	 * work first: for example, a Timeout stops its timer, and the timer
+	 * cannot expire while the children halt. This is the order of
+	 * TimeoutNode::halt() in BehaviorTree.CPP.
+	 */
 	if (self->halt != NULL) {
 		self->halt(ctx, self);
 	}
 
+	zephyrbt_halt_children(ctx, self);
+
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS)
+	/*
+	 * Run _onHalted after the subtree halted, as TreeNode::haltNode() does
+	 * in BehaviorTree.CPP.
+	 */
 	zephyrbt_lua_on_halted(ctx, self);
 #endif
 }

@@ -6,8 +6,8 @@ sample:
   name: Zephyr Behaviour Tree - Halt
   description: |
     The tree halts the running nodes that it leaves. Checks that the
-    halt function of a user node runs once, that a node halts after
-    its children, and that the Lua _onHalted condition runs.
+    halt function of a user node runs once, and that the Lua _onHalted
+    condition of a node runs after its subtree halted.
 common:
   tags:
     - zephyrbt

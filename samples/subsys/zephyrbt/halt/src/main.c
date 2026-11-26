@@ -13,7 +13,7 @@
  *  - work: the number of calls to the halt function of Work. It must be 1:
  *    the tree halts Work once, and not again on the next ticks.
  *  - order: the value of work when _onHalted of the Timeout ran. It must be
- *    1: the tree halts Work before the Timeout.
+ *    1: _onHalted of a node runs after its subtree halted.
  */
 
 #include <stdint.h>

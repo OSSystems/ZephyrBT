@@ -74,9 +74,8 @@ config ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
 	  returned RUNNING can thus be left by the tree: an earlier child of
 	  its parent stops the evaluation, or the parent completes. The tree
 	  then halts the node, as halt() does in BehaviorTree.CPP: it calls
-	  the halt function of each running node of the subtree, from the
-	  leaves to the node, so that the nodes can drop the state of the
-	  earlier run. The generator adds a weak halt function for each user
+	  the halt function of the node and then of each running node of its
+	  subtree, so that the nodes can drop the state of the earlier run. The generator adds a weak halt function for each user
 	  node, zephyrbt_<type>_<name>_halt(), which the application can
 	  override.
 
