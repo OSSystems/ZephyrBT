@@ -1,6 +1,8 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    # Use the nixpkgs that zephyr-nix is tested with. Its static code
+    # analysis tools do not work with other nixpkgs releases.
+    nixpkgs.follows = "zephyr-nix/nixpkgs";
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -17,10 +19,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    zephyr-nix = {
-      url = "github:nix-community/zephyr-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    zephyr-nix.url = "github:nix-community/zephyr-nix";
   };
 
   outputs = inputs@{ flake-parts, ... }:
@@ -41,9 +40,9 @@
         };
       };
 
-      perSystem = { config, inputs', pkgs, ... }:
+      perSystem = { config, pkgs, ... }:
         let
-          zephyr = inputs'.zephyr-nix.packages;
+          zephyr = inputs.zephyr-nix.lib.mkZephyr { inherit pkgs; };
         in
         {
           treefmt.config = {
@@ -53,7 +52,7 @@
               black.enable = true;
               clang-format = {
                 enable = true;
-                package = pkgs.clang-tools_19;
+                package = pkgs.llvmPackages_19.clang-tools;
               };
               nixpkgs-fmt.enable = true;
               shfmt.enable = true;
@@ -73,11 +72,17 @@
             ];
 
             packages = [
-              (zephyr.sdk-1_0_0.override {
+              (zephyr.sdks."1_0".sdk.override {
                 targets = [
                   "arm-zephyr-eabi"
                 ];
+                # For ZEPHYR_TOOLCHAIN_VARIANT=zephyr/llvm, which the
+                # CodeChecker static code analysis needs.
+                withLlvm = true;
               })
+
+              # Tools for -DZEPHYR_SCA_VARIANT=<variant>.
+              zephyr.sca.all
 
               (zephyr.pythonEnv.override {
                 extraPackages = pkgs: [
@@ -88,7 +93,9 @@
               zephyr.hosttools
 
               pkgs.cmake
+              pkgs.jq
               pkgs.ninja
+              pkgs.reviewdog
             ];
 
             shellHook = ''
