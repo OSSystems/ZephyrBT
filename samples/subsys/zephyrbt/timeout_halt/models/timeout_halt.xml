@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="TimeoutHalt">
+  <BehaviorTree ID="TimeoutHalt">
+    <Fallback>
+      <Sequence>
+        <GateOpen/>
+        <Fallback>
+          <Timeout msec="100">
+            <Work/>
+          </Timeout>
+          <ReportTimeout/>
+        </Fallback>
+      </Sequence>
+      <Idle/>
+    </Fallback>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Condition ID="GateOpen"
+               editable="true"/>
+    <Action ID="Idle"
+            editable="true"/>
+    <Action ID="ReportTimeout"
+            editable="true"/>
+    <Action ID="Work"
+            editable="true"/>
+  </TreeNodesModel>
+</root>
