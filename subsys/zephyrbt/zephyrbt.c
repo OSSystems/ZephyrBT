@@ -81,6 +81,8 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS)
 	enum zephyrbt_child_status pre = zephyrbt_lua_pre_check(ctx, self);
 	if (pre != ZEPHYRBT_CHILD_RUNNING_STATUS) {
+		/* The condition stops a node that can be running. */
+		zephyrbt_halt(ctx, self);
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 		--ctx->deep;
 #endif
@@ -90,8 +92,21 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 
 	enum zephyrbt_child_status status = self->function(ctx, self);
 
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT)
+	self->running = (status == ZEPHYRBT_CHILD_RUNNING_STATUS);
+
+	/*
+	 * A node that completes, for example a Timeout that expires, can leave
+	 * a child that is still running.
+	 */
+	if (!self->running) {
+		zephyrbt_halt_children(ctx, self);
+	}
+#endif
+
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS)
 	if (status == ZEPHYRBT_CHILD_RUNNING_STATUS && !zephyrbt_lua_while_check(ctx, self)) {
+		zephyrbt_halt(ctx, self);
 		status = ZEPHYRBT_CHILD_FAILURE_STATUS;
 	}
 	zephyrbt_lua_post_check(ctx, self, status);
@@ -103,6 +118,44 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 
 	return status;
 }
+
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT)
+void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+{
+	if (self == NULL || !self->running) {
+		return;
+	}
+
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
+	LOG_DBG("halt %s", self->name);
+#endif
+
+	self->running = false;
+
+	/* Halt the subtree first, so that a node halts after its children. */
+	zephyrbt_halt_children(ctx, self);
+
+	if (self->halt != NULL) {
+		self->halt(ctx, self);
+	}
+}
+
+void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+{
+	for (struct zephyrbt_node *child = zephyrbt_get_node(ctx, self->child); child != NULL;
+	     child = zephyrbt_get_node(ctx, child->sibling)) {
+		zephyrbt_halt(ctx, child);
+	}
+}
+
+void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+{
+	for (struct zephyrbt_node *sibling = zephyrbt_get_node(ctx, self->sibling); sibling != NULL;
+	     sibling = zephyrbt_get_node(ctx, sibling->sibling)) {
+		zephyrbt_halt(ctx, sibling);
+	}
+}
+#endif /* CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT */
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_DYNAMIC)
 void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)

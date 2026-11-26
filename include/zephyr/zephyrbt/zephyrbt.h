@@ -52,11 +52,17 @@ struct zephyrbt_context;
 
 typedef enum zephyrbt_child_status (*zephyrbt_tick_function_t)(struct zephyrbt_context *ctx,
 							       struct zephyrbt_node *self);
+typedef void (*zephyrbt_halt_function_t)(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
 
 struct zephyrbt_node {
 	zephyrbt_tick_function_t function;
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INIT
 	zephyrbt_tick_function_t init;
+#endif
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
+	zephyrbt_halt_function_t halt;
+	/* The node returned RUNNING on its last evaluation. */
+	bool running;
 #endif
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
 	zephyrbt_node_context_t ctx;
@@ -197,6 +203,52 @@ struct zephyrbt_blackboard_item *zephyrbt_search_blackboard(struct zephyrbt_cont
 							    const int index, const int key);
 enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx,
 					     struct zephyrbt_node *self);
+
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
+/**
+ * @brief Halt a running node and its subtree.
+ *
+ * Call the halt function of each running node of the subtree, from the
+ * leaves to the node, and mark these nodes as not running. Do nothing when
+ * the node is not running.
+ *
+ * @param ctx	The behaviour tree.
+ * @param self	The node to halt.
+ */
+void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+
+/**
+ * @brief Halt the running children of a node.
+ *
+ * @param ctx	The behaviour tree.
+ * @param self	The node whose children are halted.
+ */
+void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+
+/**
+ * @brief Halt the running siblings that follow a node.
+ *
+ * A control node calls this when it stops at a child, so that the children
+ * after it do not keep the state of an earlier run.
+ *
+ * @param ctx	The behaviour tree.
+ * @param self	The child at which the control node stopped.
+ */
+void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+#else
+static inline void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+{
+}
+
+static inline void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+{
+}
+
+static inline void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx,
+					       struct zephyrbt_node *self)
+{
+}
+#endif
 enum zephyrbt_child_status zephyrbt_action_always_success(struct zephyrbt_context *ctx,
 							  struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_action_always_failure(struct zephyrbt_context *ctx,
@@ -269,6 +321,7 @@ enum zephyrbt_timeout_attributes {
 
 enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *ctx,
 						      struct zephyrbt_node *self);
+void zephyrbt_decorator_timeout_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_context *ctx,
 							   struct zephyrbt_node *self);
 #endif

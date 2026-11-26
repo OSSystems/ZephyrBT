@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 O.S. Systems Software LTDA.
- * Copyright (c) 2024 Freedom Veiculos Eletricos
+ * Copyright (c) 2024-2026 O.S. Systems Software LTDA.
+ * Copyright (c) 2024-2026 Freedom Veiculos Eletricos
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -99,4 +99,22 @@ enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *c
 	}
 
 	return status;
+}
+
+/*
+ * The tree left the Timeout while it was running. Stop the timer, so that the
+ * next run starts a new deadline, as TimeoutNode::halt() does in
+ * BehaviorTree.CPP.
+ */
+void zephyrbt_decorator_timeout_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+{
+	struct zephyrbt_decorator_timeout_context *timeout;
+	timeout = (struct zephyrbt_decorator_timeout_context *)self->ctx;
+
+	if (timeout == NULL) {
+		return;
+	}
+
+	k_timer_stop(&timeout->timer);
+	timeout->state = ZEPHYRBT_DECORATOR_TIMEOUT_STATE_IDLE;
 }

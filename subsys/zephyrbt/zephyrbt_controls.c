@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2024 O.S. Systems Software LTDA.
- * Copyright (c) 2024 Freedom Veiculos Eletricos
+ * Copyright (c) 2024-2026 O.S. Systems Software LTDA.
+ * Copyright (c) 2024-2026 Freedom Veiculos Eletricos
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -45,6 +45,8 @@ enum zephyrbt_child_status zephyrbt_control_sequence(struct zephyrbt_context *ct
 		case ZEPHYRBT_CHILD_RUNNING_STATUS:
 			__fallthrough;
 		case ZEPHYRBT_CHILD_FAILURE_STATUS:
+			/* The children after this one are not evaluated on this tick. */
+			zephyrbt_halt_next_siblings(ctx, siblings);
 			return status;
 		case ZEPHYRBT_CHILD_SKIP_STATUS:
 			__fallthrough;
@@ -93,6 +95,8 @@ enum zephyrbt_child_status zephyrbt_control_fallback(struct zephyrbt_context *ct
 		case ZEPHYRBT_CHILD_RUNNING_STATUS:
 			__fallthrough;
 		case ZEPHYRBT_CHILD_SUCCESS_STATUS:
+			/* The children after this one are not evaluated on this tick. */
+			zephyrbt_halt_next_siblings(ctx, siblings);
 			return status;
 		case ZEPHYRBT_CHILD_SKIP_STATUS:
 			__fallthrough;

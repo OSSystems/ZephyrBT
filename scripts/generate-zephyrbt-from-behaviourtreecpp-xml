@@ -80,6 +80,14 @@ def has_builtin_node_init(builtin, function):
     return False
 
 
+def has_builtin_node_halt(builtin, function):
+    for node in builtin:
+        func, node_type, has_init, has_halt, *_ = node
+        if function == func:
+            return has_halt
+    return False
+
+
 def get_blackboard_item(item):
     if item == None:
         return "NULL"
@@ -146,6 +154,10 @@ def write_zephyrbt_function_prototypes(f, nodes, user_file):
         f.write(f"enum zephyrbt_child_status\n{fname}struct zephyrbt_context *ctx,\n")
         f.write(f"{gen_align(fname)}struct zephyrbt_node *self);\n\n")
 
+        fname = f"zephyrbt_{model}_{function}_halt("
+        f.write(f"void\n{fname}struct zephyrbt_context *ctx,\n")
+        f.write(f"{gen_align(fname)}struct zephyrbt_node *self);\n\n")
+
 
 def write_zephyrbt_custom_function(f, nodes):
     for _, num, function, model, custom, comment, attribs, conds in get_unique_custom_nodes(nodes):
@@ -163,6 +175,12 @@ def write_zephyrbt_custom_function(f, nodes):
         f.write(f"\tLOG_DBG(\"{fname[:-1]} stub function\");\n");
         f.write(f"\treturn ZEPHYRBT_CHILD_SUCCESS_STATUS;\n");
         f.write(f"}}\n");
+        fname = f"{fname[0:-len('_init(')]}_halt("
+        f.write(f"\nvoid __attribute__((weak))")
+        f.write(f"\n{fname}struct zephyrbt_context *ctx,\n")
+        f.write(f"{gen_align(fname)}struct zephyrbt_node *self)\n{{\n")
+        f.write(f"\tLOG_DBG(\"{fname[:-1]} stub function\");\n");
+        f.write(f"}}\n");
 
 
 def write_zephyrbt_nodes_table(f, nodes, builtin, bt, name):
@@ -176,10 +194,17 @@ def write_zephyrbt_nodes_table(f, nodes, builtin, bt, name):
             init_name = "NULL"
         else:
             init_name = f"{basename}_init"
+        if not custom and not has_builtin_node_halt(builtin, function):
+            halt_name = "NULL"
+        else:
+            halt_name = f"{basename}_halt"
         f.write(f"\n\t{{")
         f.write(f"\n\t\t.function={basename},")
         f.write(f"\n\t\tIF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INIT, (")
         f.write(f"\n\t\t\t.init={init_name},")
+        f.write(f"\n\t\t))")
+        f.write(f"\n\t\tIF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT, (")
+        f.write(f"\n\t\t\t.halt={halt_name},")
         f.write(f"\n\t\t))")
         if comment is None:
             fname = f"{function} [{model}, {num}]"
@@ -516,7 +541,7 @@ def addBuiltinBlackboard(idx_nodes_set, blackboard_set, builtin):
     for node in builtin:
         node_index = getSearchNode(idx_nodes_set, node[0])
         if node_index:
-            for port in node[3]:
+            for port in node[4]:
                 blackboard_set.append([-1, node_index[2], port[0], port[1], port[2], port[3]])
 
 
@@ -732,19 +757,19 @@ def main(zephyrbt_filename, output_inc, output_data, output_stub,
     timeout =  [['msec', 'input_port', None, 'After a certain amount of time, halt() the child if it is still running']]
     runonce =  [['then_skip', 'input_port', True, 'If true, skip after the first execution, otherwise return the same NodeStatus returned once by the child']]
 
-    #                  node_name,     type, has_init, blackboard_attributes
-    builtin = [('always_success', 'action',    False, []),
-               ('always_failure', 'action',    False, []),
-               ('sleep',          'action',    True,  sleep),
-               ('set_blackboard', 'action',    True,  setblackboard),
-               ('fallback',       'control',   False, []),
-               ('sequence',       'control',   False, []),
-               ('parallel',       'control',   True,  parallel),
-               ('inverter',       'decorator', False, []),
-               ('delay',          'decorator', True,  delay),
-               ('repeat',         'decorator', True,  repeat),
-               ('run_once',       'decorator', True,  runonce),
-               ('timeout',        'decorator', True,  timeout),
+    #                  node_name,     type, has_init, has_halt, blackboard_attributes
+    builtin = [('always_success', 'action',    False, False, []),
+               ('always_failure', 'action',    False, False, []),
+               ('sleep',          'action',    True,  False, sleep),
+               ('set_blackboard', 'action',    True,  False, setblackboard),
+               ('fallback',       'control',   False, False, []),
+               ('sequence',       'control',   False, False, []),
+               ('parallel',       'control',   True,  False, parallel),
+               ('inverter',       'decorator', False, False, []),
+               ('delay',          'decorator', True,  False, delay),
+               ('repeat',         'decorator', True,  False, repeat),
+               ('run_once',       'decorator', True,  False, runonce),
+               ('timeout',        'decorator', True,  True,  timeout),
               ]
 
     if not Path(zephyrbt_filename).is_file():
