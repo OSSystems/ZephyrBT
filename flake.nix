@@ -67,6 +67,15 @@
           };
 
           devShells.default = pkgs.mkShell {
+            # The native_sim runner builds without optimization, which
+            # conflicts with the _FORTIFY_SOURCE that the gcc wrapper of Nix
+            # adds: glibc then emits "_FORTIFY_SOURCE requires compiling with
+            # optimization" as an error.
+            hardeningDisable = [
+              "fortify"
+              "fortify3"
+            ];
+
             inputsFrom = [
               config.treefmt.build.devShell
             ];
