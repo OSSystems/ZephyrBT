@@ -82,3 +82,44 @@ jobs:
           check_name: Unit Test Results
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: "**/twister.xml"
+
+  # Advisory: the findings become review comments, and the job does not fail
+  # on them.
+  sca:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: ossystems/nix-actions@v1
+        with:
+          ref: ${{ inputs.ref }}
+          install-nix: true
+          flake-check: false
+          build-hosts: false
+          build-devshells: false
+          export-devshell: true
+
+      - name: Prepare Zephyr Project workspace
+        run: |
+          west config --global update.narrow true
+          west update
+
+      - name: Static Code Analysis
+        run: ./scripts/run-sca sca-out
+
+      - name: Review Static Code Analysis Findings
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          reviewdog -f=sarif -name=CodeChecker -reporter=github-pr-review \
+            -filter-mode=file -fail-level=none < sca-out/codechecker.sarif
+
+      - name: Upload Static Code Analysis Reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Static Code Analysis Reports
+          if-no-files-found: ignore
+          path: sca-out/codechecker.sarif
