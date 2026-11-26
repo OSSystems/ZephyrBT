@@ -31,7 +31,7 @@ static int ticks;
 static int closed_ticks;
 
 enum zephyrbt_child_status zephyrbt_condition_gate_open(struct zephyrbt_context *ctx,
-							struct zephyrbt_node *self)
+							const struct zephyrbt_node *self)
 {
 	++ticks;
 
@@ -39,12 +39,12 @@ enum zephyrbt_child_status zephyrbt_condition_gate_open(struct zephyrbt_context 
 }
 
 enum zephyrbt_child_status zephyrbt_action_work(struct zephyrbt_context *ctx,
-						struct zephyrbt_node *self)
+						const struct zephyrbt_node *self)
 {
 	return ZEPHYRBT_CHILD_RUNNING_STATUS;
 }
 
-void zephyrbt_action_work_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+void zephyrbt_action_work_halt(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
 	struct zephyrbt_blackboard_item *work_halts =
 		zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_WORK_ATTRIBUTE_WORK_HALTS);
@@ -53,7 +53,7 @@ void zephyrbt_action_work_halt(struct zephyrbt_context *ctx, struct zephyrbt_nod
 }
 
 enum zephyrbt_child_status zephyrbt_action_report(struct zephyrbt_context *ctx,
-						  struct zephyrbt_node *self)
+						  const struct zephyrbt_node *self)
 {
 	if (++closed_ticks != CLOSED_TICKS) {
 		return ZEPHYRBT_CHILD_RUNNING_STATUS;

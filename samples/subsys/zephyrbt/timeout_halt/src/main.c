@@ -35,7 +35,7 @@ static int64_t reopen_ms = -1;
 static bool done;
 
 enum zephyrbt_child_status zephyrbt_condition_gate_open(struct zephyrbt_context *ctx,
-							struct zephyrbt_node *self)
+							const struct zephyrbt_node *self)
 {
 	int64_t now = k_uptime_get();
 
@@ -63,7 +63,7 @@ enum zephyrbt_child_status zephyrbt_condition_gate_open(struct zephyrbt_context 
 }
 
 enum zephyrbt_child_status zephyrbt_action_work(struct zephyrbt_context *ctx,
-						struct zephyrbt_node *self)
+						const struct zephyrbt_node *self)
 {
 	k_msleep(TICK_ms);
 
@@ -71,7 +71,7 @@ enum zephyrbt_child_status zephyrbt_action_work(struct zephyrbt_context *ctx,
 }
 
 enum zephyrbt_child_status zephyrbt_action_report_timeout(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 	if (reopen_ms < 0) {
 		LOG_ERR("Timeout before the gate closed");
@@ -94,7 +94,7 @@ enum zephyrbt_child_status zephyrbt_action_report_timeout(struct zephyrbt_contex
 }
 
 enum zephyrbt_child_status zephyrbt_action_idle(struct zephyrbt_context *ctx,
-						struct zephyrbt_node *self)
+						const struct zephyrbt_node *self)
 {
 	k_msleep(TICK_ms);
 

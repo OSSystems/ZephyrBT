@@ -181,7 +181,7 @@ struct sense_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_sense_init(struct zephyrbt_context *ctx,
-						      struct zephyrbt_node *self)
+						      const struct zephyrbt_node *self)
 {
 	struct robot_state *s = robot_get_state();
 	struct sense_ctx *c = k_malloc(sizeof(*c));
@@ -253,14 +253,14 @@ enum zephyrbt_child_status zephyrbt_action_sense_init(struct zephyrbt_context *c
 
 	display_init();
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_sense(struct zephyrbt_context *ctx,
-						 struct zephyrbt_node *self)
+						 const struct zephyrbt_node *self)
 {
-	struct sense_ctx *c = (struct sense_ctx *)self->ctx;
+	struct sense_ctx *c = (struct sense_ctx *)zephyrbt_node_ctx_get(ctx, self);
 	struct robot_state *s = robot_get_state();
 
 	int tick = display_get_tick() + 1;
@@ -286,7 +286,7 @@ struct respawn_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_respawn_init(struct zephyrbt_context *ctx,
-							struct zephyrbt_node *self)
+							const struct zephyrbt_node *self)
 {
 	struct respawn_ctx *c = k_malloc(sizeof(*c));
 
@@ -297,14 +297,14 @@ enum zephyrbt_child_status zephyrbt_action_respawn_init(struct zephyrbt_context 
 	c->new_mission = zephyrbt_search_blackboard(ctx, self->index,
 						    ZEPHYRBT_RESPAWN_ATTRIBUTE_NEW_MISSION);
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_respawn(struct zephyrbt_context *ctx,
-						   struct zephyrbt_node *self)
+						   const struct zephyrbt_node *self)
 {
-	struct respawn_ctx *c = (struct respawn_ctx *)self->ctx;
+	struct respawn_ctx *c = (struct respawn_ctx *)zephyrbt_node_ctx_get(ctx, self);
 
 	if ((intptr_t)c->new_mission->item == 1) {
 		c->new_mission->item = (zephyrbt_node_context_t)0;
@@ -328,7 +328,7 @@ struct render_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_render_init(struct zephyrbt_context *ctx,
-						       struct zephyrbt_node *self)
+						       const struct zephyrbt_node *self)
 {
 	struct render_ctx *c = k_malloc(sizeof(*c));
 
@@ -343,14 +343,14 @@ enum zephyrbt_child_status zephyrbt_action_render_init(struct zephyrbt_context *
 	c->tick_count =
 		zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_RENDER_ATTRIBUTE_TICK_COUNT);
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_render(struct zephyrbt_context *ctx,
-						  struct zephyrbt_node *self)
+						  const struct zephyrbt_node *self)
 {
-	struct render_ctx *c = (struct render_ctx *)self->ctx;
+	struct render_ctx *c = (struct render_ctx *)zephyrbt_node_ctx_get(ctx, self);
 
 	int px = (intptr_t)c->pos_x->item;
 	int py = (intptr_t)c->pos_y->item;

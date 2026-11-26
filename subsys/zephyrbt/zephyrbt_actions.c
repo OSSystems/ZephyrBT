@@ -10,7 +10,7 @@
 LOG_MODULE_REGISTER(zephyrbt_actions, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
 
 enum zephyrbt_child_status zephyrbt_action_always_success(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
@@ -20,7 +20,7 @@ enum zephyrbt_child_status zephyrbt_action_always_success(struct zephyrbt_contex
 }
 
 enum zephyrbt_child_status zephyrbt_action_always_failure(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);

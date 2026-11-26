@@ -9,12 +9,12 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(zephyrbt, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
 
-inline struct zephyrbt_node *zephyrbt_get_root(struct zephyrbt_context *ctx)
+inline const struct zephyrbt_node *zephyrbt_get_root(struct zephyrbt_context *ctx)
 {
 	return &ctx->node[ctx->nodes - 1];
 }
 
-inline struct zephyrbt_node *zephyrbt_get_node(struct zephyrbt_context *ctx, int index)
+inline const struct zephyrbt_node *zephyrbt_get_node(struct zephyrbt_context *ctx, int index)
 {
 	/* ARRAY_SIZE is size_t and negative value MUST BE checked first */
 	if (index < 0) {
@@ -56,8 +56,16 @@ inline struct zephyrbt_blackboard_item *zephyrbt_search_blackboard(struct zephyr
 	return NULL;
 }
 
+#if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT)
+static inline void zephyrbt_set_running(struct zephyrbt_context *ctx,
+					const struct zephyrbt_node *self, bool running)
+{
+	atomic_set_bit_to(ctx->running, self->index, running);
+}
+#endif
+
 inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx,
-						    struct zephyrbt_node *self)
+						    const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("eval %s", self->name);
@@ -93,13 +101,13 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 	enum zephyrbt_child_status status = self->function(ctx, self);
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT)
-	self->running = (status == ZEPHYRBT_CHILD_RUNNING_STATUS);
+	zephyrbt_set_running(ctx, self, status == ZEPHYRBT_CHILD_RUNNING_STATUS);
 
 	/*
 	 * A node that completes, for example a Timeout that expires, can leave
 	 * a child that is still running.
 	 */
-	if (!self->running) {
+	if (status != ZEPHYRBT_CHILD_RUNNING_STATUS) {
 		zephyrbt_halt_children(ctx, self);
 	}
 #endif
@@ -120,9 +128,9 @@ inline enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx
 }
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT)
-void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+void zephyrbt_halt(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
-	if (self == NULL || !self->running) {
+	if (self == NULL || !atomic_test_bit(ctx->running, self->index)) {
 		return;
 	}
 
@@ -130,7 +138,7 @@ void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
 	LOG_DBG("halt %s", self->name);
 #endif
 
-	self->running = false;
+	atomic_clear_bit(ctx->running, self->index);
 
 	/*
 	 * Halt the node before its children, so that the node stops its own
@@ -153,18 +161,18 @@ void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
 #endif
 }
 
-void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+void zephyrbt_halt_children(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
-	for (struct zephyrbt_node *child = zephyrbt_get_node(ctx, self->child); child != NULL;
+	for (const struct zephyrbt_node *child = zephyrbt_get_node(ctx, self->child); child != NULL;
 	     child = zephyrbt_get_node(ctx, child->sibling)) {
 		zephyrbt_halt(ctx, child);
 	}
 }
 
-void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
-	for (struct zephyrbt_node *sibling = zephyrbt_get_node(ctx, self->sibling); sibling != NULL;
-	     sibling = zephyrbt_get_node(ctx, sibling->sibling)) {
+	for (const struct zephyrbt_node *sibling = zephyrbt_get_node(ctx, self->sibling);
+	     sibling != NULL; sibling = zephyrbt_get_node(ctx, sibling->sibling)) {
 		zephyrbt_halt(ctx, sibling);
 	}
 }
@@ -198,7 +206,7 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 	 * context to be initialized at root or as close as root possible.
 	 */
 	for (int i = ctx->nodes - 1; i >= 0; --i) {
-		struct zephyrbt_node *self = zephyrbt_get_node(ctx, i);
+		const struct zephyrbt_node *self = zephyrbt_get_node(ctx, i);
 
 		if (self == NULL) {
 			LOG_ERR("Node %d is invalid", i);
@@ -206,7 +214,7 @@ void zephyrbt_thread_func(void *zephyrbt_ctx, void *, void *)
 		}
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT)
-		self->ctx = NULL;
+		zephyrbt_node_ctx_set(ctx, self, NULL);
 #endif
 
 		if (self->init == NULL) {

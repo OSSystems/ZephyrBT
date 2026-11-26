@@ -29,13 +29,13 @@ LOG_MODULE_REGISTER(zephyrbt_controls, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
  *  - return status
  */
 enum zephyrbt_child_status zephyrbt_control_sequence(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self)
+						     const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
 #endif
 
-	struct zephyrbt_node *siblings = zephyrbt_get_node(ctx, self->child);
+	const struct zephyrbt_node *siblings = zephyrbt_get_node(ctx, self->child);
 	enum zephyrbt_child_status status = ZEPHYRBT_CHILD_FAILURE_STATUS;
 
 	while (siblings) {
@@ -79,13 +79,13 @@ enum zephyrbt_child_status zephyrbt_control_sequence(struct zephyrbt_context *ct
  *  - return status
  */
 enum zephyrbt_child_status zephyrbt_control_fallback(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self)
+						     const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
 #endif
 
-	struct zephyrbt_node *siblings = zephyrbt_get_node(ctx, self->child);
+	const struct zephyrbt_node *siblings = zephyrbt_get_node(ctx, self->child);
 	enum zephyrbt_child_status status = ZEPHYRBT_CHILD_FAILURE_STATUS;
 
 	while (siblings) {
@@ -111,7 +111,7 @@ enum zephyrbt_child_status zephyrbt_control_fallback(struct zephyrbt_context *ct
 
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT)
 enum zephyrbt_child_status zephyrbt_control_parallel_init(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("init: %s", self->name);
@@ -121,7 +121,7 @@ enum zephyrbt_child_status zephyrbt_control_parallel_init(struct zephyrbt_contex
 }
 
 enum zephyrbt_child_status zephyrbt_control_parallel(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self)
+						     const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);

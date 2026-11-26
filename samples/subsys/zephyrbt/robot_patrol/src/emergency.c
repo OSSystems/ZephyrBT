@@ -31,7 +31,7 @@ struct check_metric_ctx {
 };
 
 enum zephyrbt_child_status zephyrbt_action_check_metric_init(struct zephyrbt_context *ctx,
-							     struct zephyrbt_node *self)
+							     const struct zephyrbt_node *self)
 {
 	struct check_metric_ctx *c = k_malloc(sizeof(*c));
 
@@ -46,14 +46,14 @@ enum zephyrbt_child_status zephyrbt_action_check_metric_init(struct zephyrbt_con
 	c->charging = zephyrbt_search_blackboard(ctx, self->index,
 						 ZEPHYRBT_CHECK_METRIC_ATTRIBUTE_CHARGING);
 
-	self->ctx = c;
+	zephyrbt_node_ctx_set(ctx, self, c);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_check_metric(struct zephyrbt_context *ctx,
-							struct zephyrbt_node *self)
+							const struct zephyrbt_node *self)
 {
-	struct check_metric_ctx *c = (struct check_metric_ctx *)self->ctx;
+	struct check_metric_ctx *c = (struct check_metric_ctx *)zephyrbt_node_ctx_get(ctx, self);
 
 	int metric = (intptr_t)c->metric->item;
 	int threshold = (intptr_t)c->threshold->item;

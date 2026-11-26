@@ -14,19 +14,20 @@ LOG_MODULE_REGISTER(lua_conditions, CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL);
 #include "lua_conditions.h"
 
 enum zephyrbt_child_status zephyrbt_action_increment_init(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 	struct zephyrbt_blackboard_item *item =
 		zephyrbt_search_blackboard(ctx, self->index, ZEPHYRBT_INCREMENT_ATTRIBUTE_COUNTER);
 
-	self->ctx = item;
+	zephyrbt_node_ctx_set(ctx, self, item);
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_increment(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self)
+						     const struct zephyrbt_node *self)
 {
-	struct zephyrbt_blackboard_item *item = (struct zephyrbt_blackboard_item *)self->ctx;
+	struct zephyrbt_blackboard_item *item =
+		(struct zephyrbt_blackboard_item *)zephyrbt_node_ctx_get(ctx, self);
 	intptr_t val = (intptr_t)item->item;
 
 	val++;
@@ -36,28 +37,28 @@ enum zephyrbt_child_status zephyrbt_action_increment(struct zephyrbt_context *ct
 }
 
 enum zephyrbt_child_status zephyrbt_condition_check_value_init(struct zephyrbt_context *ctx,
-							       struct zephyrbt_node *self)
+							       const struct zephyrbt_node *self)
 {
 	LOG_DBG("check_value_init");
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_condition_check_value(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 	LOG_INF("check_value: ticked (odd counter)");
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_guarded_action_init(struct zephyrbt_context *ctx,
-							       struct zephyrbt_node *self)
+							       const struct zephyrbt_node *self)
 {
 	LOG_DBG("guarded_action_init");
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;
 }
 
 enum zephyrbt_child_status zephyrbt_action_guarded_action(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 	LOG_INF("guarded_action: executed");
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;

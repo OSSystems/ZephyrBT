@@ -9,6 +9,7 @@
 #define ZEPHYR_INCLUDE_ZEPHYRBT_ZEPHYRBT_H_
 
 #include <zephyr/kernel.h>
+#include <zephyr/sys/atomic.h>
 
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
 #include <lua.h>
@@ -51,8 +52,9 @@ struct zephyrbt_blackboard_item;
 struct zephyrbt_context;
 
 typedef enum zephyrbt_child_status (*zephyrbt_tick_function_t)(struct zephyrbt_context *ctx,
-							       struct zephyrbt_node *self);
-typedef void (*zephyrbt_halt_function_t)(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+							       const struct zephyrbt_node *self);
+typedef void (*zephyrbt_halt_function_t)(struct zephyrbt_context *ctx,
+					 const struct zephyrbt_node *self);
 
 struct zephyrbt_node {
 	zephyrbt_tick_function_t function;
@@ -61,17 +63,12 @@ struct zephyrbt_node {
 #endif
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
 	zephyrbt_halt_function_t halt;
-	/* The node returned RUNNING on its last evaluation. */
-	bool running;
-#endif
-#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
-	zephyrbt_node_context_t ctx;
 #endif
 	zephyrbt_node_idx_t sibling;
 	zephyrbt_node_idx_t child;
 	zephyrbt_node_idx_t index;
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO
-	char *name;
+	const char *name;
 #endif
 };
 
@@ -117,8 +114,17 @@ struct zephyrbt_context {
 	const char *name;
 	uint32_t deep;
 #endif
-	struct zephyrbt_node *node;
+	/* The nodes are constant, so that the table can be in flash. */
+	const struct zephyrbt_node *node;
 	const uint32_t nodes;
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
+	/* The context of each node, indexed by the node index. */
+	zephyrbt_node_context_t *node_ctx;
+#endif
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
+	/* One bit for each node, set while the node is running. */
+	atomic_t *running;
+#endif
 	struct zephyrbt_blackboard_item *blackboard;
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_USER_DATA
 	void *user_data;
@@ -153,6 +159,10 @@ struct zephyrbt_context {
  * @brief Macro for creating a Behaviour Tree instance. This is a convinience
  * tool to provide an easy to use case.
  *
+ * The node contexts and the running flags are the arrays _name##_node_ctx
+ * and _name##_running, which the generator defines with
+ * ZEPHYRBT_NODE_DATA_DEFINE().
+ *
  * @param _name		Name of the instance.
  * @param _nodes	The Behaviour Tree nodes structure.
  * @param _stack_size	Thread stack size.
@@ -180,6 +190,12 @@ struct zephyrbt_context {
 		)										   \
 		.node       = _nodes,								   \
 		.nodes      = ARRAY_SIZE(_nodes),						   \
+		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT, (				   \
+			.node_ctx = _name##_node_ctx, )						   \
+		)										   \
+		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT, (				   \
+			.running = _name##_running, )						   \
+		)										   \
 		.blackboard = _blackboard,							   \
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS, (			   \
 			.lua = NULL,								   \
@@ -195,14 +211,59 @@ struct zephyrbt_context {
 		))										   \
 	}
 
+/**
+ * @brief Define the RAM data of the nodes of a Behaviour Tree instance.
+ *
+ * @param _name		Name of the instance, as given to ZEPHYRBT_DEFINE().
+ * @param _count	Number of nodes.
+ */
+#define ZEPHYRBT_NODE_DATA_DEFINE(_name, _count)						   \
+	IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT, (					   \
+		static zephyrbt_node_context_t _name##_node_ctx[_count];			   \
+	))											   \
+	IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT, (					   \
+		static ATOMIC_DEFINE(_name##_running, _count);					   \
+	))
+
 // clang-format on
 
-struct zephyrbt_node *zephyrbt_get_root(struct zephyrbt_context *ctx);
-struct zephyrbt_node *zephyrbt_get_node(struct zephyrbt_context *ctx, int index);
+const struct zephyrbt_node *zephyrbt_get_root(struct zephyrbt_context *ctx);
+const struct zephyrbt_node *zephyrbt_get_node(struct zephyrbt_context *ctx, int index);
 struct zephyrbt_blackboard_item *zephyrbt_search_blackboard(struct zephyrbt_context *ctx,
 							    const int index, const int key);
 enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx,
-					     struct zephyrbt_node *self);
+					     const struct zephyrbt_node *self);
+
+#ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
+/**
+ * @brief Get the context of a node.
+ *
+ * @param ctx	The behaviour tree.
+ * @param self	The node.
+ *
+ * @return The context that zephyrbt_node_ctx_set() stored, or NULL.
+ */
+static inline zephyrbt_node_context_t zephyrbt_node_ctx_get(struct zephyrbt_context *ctx,
+							    const struct zephyrbt_node *self)
+{
+	return ctx->node_ctx[self->index];
+}
+
+/**
+ * @brief Set the context of a node.
+ *
+ * @param ctx	The behaviour tree.
+ * @param self	The node.
+ * @param value	The context, for example the memory that the init function
+ *		allocates.
+ */
+static inline void zephyrbt_node_ctx_set(struct zephyrbt_context *ctx,
+					 const struct zephyrbt_node *self,
+					 zephyrbt_node_context_t value)
+{
+	ctx->node_ctx[self->index] = value;
+}
+#endif
 
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_HALT
 /**
@@ -215,7 +276,7 @@ enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx,
  * @param ctx	The behaviour tree.
  * @param self	The node to halt.
  */
-void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+void zephyrbt_halt(struct zephyrbt_context *ctx, const struct zephyrbt_node *self);
 
 /**
  * @brief Halt the running children of a node.
@@ -223,7 +284,7 @@ void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
  * @param ctx	The behaviour tree.
  * @param self	The node whose children are halted.
  */
-void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+void zephyrbt_halt_children(struct zephyrbt_context *ctx, const struct zephyrbt_node *self);
 
 /**
  * @brief Halt the running siblings that follow a node.
@@ -234,48 +295,49 @@ void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *
  * @param ctx	The behaviour tree.
  * @param self	The child at which the control node stopped.
  */
-void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx, const struct zephyrbt_node *self);
 #else
-static inline void zephyrbt_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+static inline void zephyrbt_halt(struct zephyrbt_context *ctx, const struct zephyrbt_node *self)
 {
 }
 
-static inline void zephyrbt_halt_children(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+static inline void zephyrbt_halt_children(struct zephyrbt_context *ctx,
+					  const struct zephyrbt_node *self)
 {
 }
 
 static inline void zephyrbt_halt_next_siblings(struct zephyrbt_context *ctx,
-					       struct zephyrbt_node *self)
+					       const struct zephyrbt_node *self)
 {
 }
 #endif
 enum zephyrbt_child_status zephyrbt_action_always_success(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self);
+							  const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_action_always_failure(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self);
+							  const struct zephyrbt_node *self);
 enum zephyrbt_set_blackboard_attributes {
 	ZEPHYRBT_SET_BLACKBOARD_ATTRIBUTE_VALUE,
 	ZEPHYRBT_SET_BLACKBOARD_ATTRIBUTE_OUTPUT_KEY,
 };
 enum zephyrbt_child_status zephyrbt_action_set_blackboard(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self);
+							  const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_action_set_blackboard_init(struct zephyrbt_context *ctx,
-							       struct zephyrbt_node *self);
+							       const struct zephyrbt_node *self);
 
 enum zephyrbt_sleep_attributes {
 	ZEPHYRBT_SLEEP_ATTRIBUTE_MSEC,
 };
 enum zephyrbt_child_status zephyrbt_action_sleep(struct zephyrbt_context *ctx,
-						 struct zephyrbt_node *self);
+						 const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_action_sleep_init(struct zephyrbt_context *ctx,
-						      struct zephyrbt_node *self);
+						      const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_control_fallback(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self);
+						     const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_control_sequence(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self);
+						     const struct zephyrbt_node *self);
 
 enum zephyrbt_child_status zephyrbt_decorator_inverter(struct zephyrbt_context *ctx,
-						       struct zephyrbt_node *self);
+						       const struct zephyrbt_node *self);
 
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_CONTEXT
 enum zephyrbt_parallel_attributes {
@@ -284,56 +346,57 @@ enum zephyrbt_parallel_attributes {
 };
 
 enum zephyrbt_child_status zephyrbt_control_parallel(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self);
+						     const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_control_parallel_init(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self);
+							  const struct zephyrbt_node *self);
 
 enum zephyrbt_repeat_attributes {
 	ZEPHYRBT_REPEAT_ATTRIBUTE_NUM_CYCLES,
 };
 
 enum zephyrbt_child_status zephyrbt_decorator_repeat(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self);
+						     const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_decorator_repeat_init(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self);
+							  const struct zephyrbt_node *self);
 
 enum zephyrbt_delay_attributes {
 	ZEPHYRBT_DELAY_ATTRIBUTE_DELAY_MSEC,
 };
 
 enum zephyrbt_child_status zephyrbt_decorator_delay(struct zephyrbt_context *ctx,
-						    struct zephyrbt_node *self);
+						    const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_decorator_delay_init(struct zephyrbt_context *ctx,
-							 struct zephyrbt_node *self);
+							 const struct zephyrbt_node *self);
 
 enum zephyrbt_run_once_attributes {
 	ZEPHYRBT_RUN_ONCE_ATTRIBUTE_THEN_SKIP,
 };
 
 enum zephyrbt_child_status zephyrbt_decorator_run_once(struct zephyrbt_context *ctx,
-						       struct zephyrbt_node *self);
+						       const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_context *ctx,
-							    struct zephyrbt_node *self);
+							    const struct zephyrbt_node *self);
 
 enum zephyrbt_timeout_attributes {
 	ZEPHYRBT_TIMEOUT_ATTRIBUTE_MSEC,
 };
 
 enum zephyrbt_child_status zephyrbt_decorator_timeout(struct zephyrbt_context *ctx,
-						      struct zephyrbt_node *self);
-void zephyrbt_decorator_timeout_halt(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+						      const struct zephyrbt_node *self);
+void zephyrbt_decorator_timeout_halt(struct zephyrbt_context *ctx,
+				     const struct zephyrbt_node *self);
 enum zephyrbt_child_status zephyrbt_decorator_timeout_init(struct zephyrbt_context *ctx,
-							   struct zephyrbt_node *self);
+							   const struct zephyrbt_node *self);
 #endif
 
 #ifdef CONFIG_ZEPHYR_BEHAVIOUR_TREE_LUA_CONDITIONS
 int zephyrbt_lua_init(struct zephyrbt_context *ctx);
 enum zephyrbt_child_status zephyrbt_lua_pre_check(struct zephyrbt_context *ctx,
-						  struct zephyrbt_node *self);
-void zephyrbt_lua_post_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self,
+						  const struct zephyrbt_node *self);
+void zephyrbt_lua_post_check(struct zephyrbt_context *ctx, const struct zephyrbt_node *self,
 			     enum zephyrbt_child_status status);
-bool zephyrbt_lua_while_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
-void zephyrbt_lua_on_halted(struct zephyrbt_context *ctx, struct zephyrbt_node *self);
+bool zephyrbt_lua_while_check(struct zephyrbt_context *ctx, const struct zephyrbt_node *self);
+void zephyrbt_lua_on_halted(struct zephyrbt_context *ctx, const struct zephyrbt_node *self);
 #endif
 
 #ifdef __cplusplus

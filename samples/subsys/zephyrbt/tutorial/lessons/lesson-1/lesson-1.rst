@@ -32,7 +32,7 @@ be easier translated to check some hardware condition like ADC's, actuators etc.
 
    enum zephyrbt_child_status
    zephyrbt_action_grab_beer(struct zephyrbt_context *ctx,
-            struct zephyrbt_node *self)
+            const struct zephyrbt_node *self)
    {
       static int count = 0;
 

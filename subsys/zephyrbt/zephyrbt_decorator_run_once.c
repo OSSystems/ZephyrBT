@@ -20,7 +20,7 @@ struct zephyrbt_decorator_run_once_context {
 };
 
 enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_context *ctx,
-							    struct zephyrbt_node *self)
+							    const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("init: %s", self->name);
@@ -29,7 +29,7 @@ enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_cont
 	struct zephyrbt_decorator_run_once_context *run_once;
 
 	run_once = k_malloc(sizeof(struct zephyrbt_decorator_run_once_context));
-	self->ctx = run_once;
+	zephyrbt_node_ctx_set(ctx, self, run_once);
 
 	if (run_once == NULL) {
 		LOG_ERR("Context can not be allocate.");
@@ -52,14 +52,14 @@ enum zephyrbt_child_status zephyrbt_decorator_run_once_init(struct zephyrbt_cont
 }
 
 enum zephyrbt_child_status zephyrbt_decorator_run_once(struct zephyrbt_context *ctx,
-						       struct zephyrbt_node *self)
+						       const struct zephyrbt_node *self)
 {
 #if defined(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO)
 	LOG_DBG("%s", self->name);
 #endif
 
 	struct zephyrbt_decorator_run_once_context *run_once;
-	run_once = (struct zephyrbt_decorator_run_once_context *)self->ctx;
+	run_once = (struct zephyrbt_decorator_run_once_context *)zephyrbt_node_ctx_get(ctx, self);
 
 	if (run_once->state == ZEPHYRBT_DECORATOR_RUN_ONCE_STATE_FINISHED) {
 		return ZEPHYRBT_CHILD_SKIP_STATUS;

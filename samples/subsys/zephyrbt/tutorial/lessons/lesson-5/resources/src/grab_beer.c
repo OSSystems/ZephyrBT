@@ -17,14 +17,14 @@ struct zephyrbt_action_grab_beer_context {
 };
 
 enum zephyrbt_child_status zephyrbt_action_grab_beer_init(struct zephyrbt_context *ctx,
-							  struct zephyrbt_node *self)
+							  const struct zephyrbt_node *self)
 {
 	LOG_DBG("zephyrbt_action_grab_beer_init stub function");
 
 	struct zephyrbt_action_grab_beer_context *grab_beeer_ctx;
 
 	grab_beeer_ctx = k_malloc(sizeof(struct zephyrbt_action_grab_beer_context));
-	self->ctx = grab_beeer_ctx;
+	zephyrbt_node_ctx_set(ctx, self, grab_beeer_ctx);
 
 	if (grab_beeer_ctx == NULL) {
 		LOG_ERR("Context can not be allocate. Need more memory!!");
@@ -37,10 +37,11 @@ enum zephyrbt_child_status zephyrbt_action_grab_beer_init(struct zephyrbt_contex
 }
 
 enum zephyrbt_child_status zephyrbt_action_grab_beer(struct zephyrbt_context *ctx,
-						     struct zephyrbt_node *self)
+						     const struct zephyrbt_node *self)
 {
 	struct zephyrbt_action_grab_beer_context *grab_beeer_ctx;
-	grab_beeer_ctx = (struct zephyrbt_action_grab_beer_context *)self->ctx;
+	grab_beeer_ctx =
+		(struct zephyrbt_action_grab_beer_context *)zephyrbt_node_ctx_get(ctx, self);
 
 	++grab_beeer_ctx->counter;
 
