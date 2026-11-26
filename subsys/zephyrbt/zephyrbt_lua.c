@@ -276,6 +276,15 @@ enum zephyrbt_child_status zephyrbt_lua_pre_check(struct zephyrbt_context *ctx,
 	return ZEPHYRBT_CHILD_RUNNING_STATUS;
 }
 
+void zephyrbt_lua_on_halted(struct zephyrbt_context *ctx, struct zephyrbt_node *self)
+{
+	struct zephyrbt_node_conditions *c = &ctx->conditions[self->index];
+
+	if (c->refs[ZEPHYRBT_COND_ON_HALTED] != LUA_NOREF) {
+		zephyrbt_lua_exec(ctx, c->refs[ZEPHYRBT_COND_ON_HALTED]);
+	}
+}
+
 void zephyrbt_lua_post_check(struct zephyrbt_context *ctx, struct zephyrbt_node *self,
 			     enum zephyrbt_child_status status)
 {
