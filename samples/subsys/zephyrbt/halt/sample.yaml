@@ -23,3 +23,17 @@ tests:
       type: one_line
       regex:
         - "I: halt result: work=1 order=1"
+  samples.zephyrbt.halt.no_node_info:
+    platform_allow:
+      - native_sim/native/64
+      - mps2/an385
+    timeout: 30
+    extra_configs:
+      # The blackboard and the Lua conditions must work without the node
+      # information.
+      - CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO=n
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "I: halt result: work=1 order=1"

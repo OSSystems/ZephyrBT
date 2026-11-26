@@ -212,9 +212,11 @@ def write_zephyrbt_nodes_table(f, nodes, builtin, bt, name):
             fname = f"{comment} [{model}, {num}]"
         f.write(f"\n\t\t.sibling={s_idx},")
         f.write(f"\n\t\t.child={c_idx},")
+        # The blackboard and the Lua conditions use the index, also without
+        # the node information.
+        f.write(f"\n\t\t.index={num},")
         f.write(f"\n\t\tIF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (")
         f.write(f"\n\t\t\t.name=\"{fname}\",")
-        f.write(f"\n\t\t\t.index={num},")
         f.write(f"\n\t\t))")
         f.write(f"\n\t}},")
     f.write(f"\n}};\n")
