@@ -53,10 +53,10 @@ int robot_bfs(struct robot_state *state, int from_x, int from_y, int to_x, int t
 {
 	struct robot_path *p = &state->path;
 	int8_t visited[GRID_SIZE][GRID_SIZE];
-	int8_t parent_x[GRID_SIZE][GRID_SIZE];
-	int8_t parent_y[GRID_SIZE][GRID_SIZE];
-	int8_t queue_x[GRID_SIZE * GRID_SIZE];
-	int8_t queue_y[GRID_SIZE * GRID_SIZE];
+	int16_t parent_x[GRID_SIZE][GRID_SIZE];
+	int16_t parent_y[GRID_SIZE][GRID_SIZE];
+	int16_t queue_x[GRID_SIZE * GRID_SIZE];
+	int16_t queue_y[GRID_SIZE * GRID_SIZE];
 	int head = 0;
 	int tail = 0;
 
@@ -145,8 +145,8 @@ found:
 	/* Reverse the path (it was built backward) */
 	for (int i = 0; i < p->len / 2; i++) {
 		int j = p->len - 1 - i;
-		int8_t tx = p->steps[i][0];
-		int8_t ty = p->steps[i][1];
+		int16_t tx = p->steps[i][0];
+		int16_t ty = p->steps[i][1];
 
 		p->steps[i][0] = p->steps[j][0];
 		p->steps[i][1] = p->steps[j][1];

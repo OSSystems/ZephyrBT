@@ -47,7 +47,7 @@ struct zephyrbt_blackboard_item;
 #define MIN_CLEARANCE    1
 
 struct robot_path {
-	int8_t steps[MAX_PATH][2];
+	int16_t steps[MAX_PATH][2];
 	int8_t len;
 	int8_t idx;
 	bool valid;
@@ -55,7 +55,7 @@ struct robot_path {
 
 struct robot_state {
 	uint8_t grid[GRID_SIZE][GRID_SIZE];
-	int8_t waypoints[NUM_WAYPOINTS][2];
+	int16_t waypoints[NUM_WAYPOINTS][2];
 	struct robot_path path;
 	int16_t total_targets;
 	struct zephyrbt_blackboard_item *battery_item;

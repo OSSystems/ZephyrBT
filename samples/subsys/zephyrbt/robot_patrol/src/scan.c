@@ -140,8 +140,8 @@ enum zephyrbt_child_status zephyrbt_action_perform_scan(struct zephyrbt_context 
 		char msg[48];
 
 		display_set_scanning(2);
-		snprintf(msg, sizeof(msg), "Found %d target%s!", c->found,
-			 c->found != 1 ? "s" : "");
+		(void)snprintf(msg, sizeof(msg), "Found %d target%s!", c->found,
+			       c->found != 1 ? "s" : "");
 		display_update_status(msg);
 
 		/* Drain battery */
@@ -186,6 +186,10 @@ enum zephyrbt_child_status zephyrbt_action_perform_scan(struct zephyrbt_context 
 		display_render(s, px, py, bat, 0);
 		c->phase = SCAN_IDLE;
 		return ZEPHYRBT_CHILD_RUNNING_STATUS;
+
+	default:
+		/* SCAN_IDLE: the scan is complete. */
+		break;
 	}
 
 	return ZEPHYRBT_CHILD_SUCCESS_STATUS;

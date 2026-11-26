@@ -189,43 +189,42 @@ static char rbuf[128];
 
 static void print_right(int row, int battery, int pos_x, int pos_y, int tick)
 {
-	int n = 0;
-
 	rbuf[0] = '\0';
 	switch (row) {
 	case 0:
 		/* Battery rendered separately */
 		break;
 	case 1:
-		n = snprintf(rbuf, sizeof(rbuf), "Pos     (%d,%d)", pos_x, pos_y);
+		(void)snprintf(rbuf, sizeof(rbuf), "Pos     (%d,%d)", pos_x, pos_y);
 		break;
 	case 2:
 		if (g_disp.target_wp >= 0) {
-			n = snprintf(rbuf, sizeof(rbuf), "Target  W%d (%d,%d)",
-				     g_disp.target_wp + 1, g_disp.target_x, g_disp.target_y);
+			(void)snprintf(rbuf, sizeof(rbuf), "Target  W%d (%d,%d)",
+				       g_disp.target_wp + 1, g_disp.target_x, g_disp.target_y);
 		} else {
-			n = snprintf(rbuf, sizeof(rbuf), "Target  --");
+			(void)snprintf(rbuf, sizeof(rbuf), "Target  --");
 		}
 		break;
 	case 3:
 		if (g_disp.step_total > 0) {
-			n = snprintf(rbuf, sizeof(rbuf), "Step    %d/%d", g_disp.step,
-				     g_disp.step_total);
+			(void)snprintf(rbuf, sizeof(rbuf), "Step    %d/%d", g_disp.step,
+				       g_disp.step_total);
 		} else {
-			n = snprintf(rbuf, sizeof(rbuf), "Step    --");
+			(void)snprintf(rbuf, sizeof(rbuf), "Step    --");
 		}
 		break;
 	case 4:
-		n = snprintf(rbuf, sizeof(rbuf), "Scanned %d/%d", g_disp.scans_done, NUM_WAYPOINTS);
+		(void)snprintf(rbuf, sizeof(rbuf), "Scanned %d/%d", g_disp.scans_done,
+			       NUM_WAYPOINTS);
 		break;
 	case 5:
-		n = snprintf(rbuf, sizeof(rbuf), "Targets %d", g_disp.targets_found);
+		(void)snprintf(rbuf, sizeof(rbuf), "Targets %d", g_disp.targets_found);
 		break;
 	case 6:
-		n = snprintf(rbuf, sizeof(rbuf), "Tick    %d", tick);
+		(void)snprintf(rbuf, sizeof(rbuf), "Tick    %d", tick);
 		break;
 	case 7:
-		n = snprintf(rbuf, sizeof(rbuf), "%s", g_disp.status);
+		(void)snprintf(rbuf, sizeof(rbuf), "%s", g_disp.status);
 		break;
 	default:
 		break;
@@ -254,8 +253,8 @@ void display_render(struct robot_state *state, int pos_x, int pos_y, int battery
 	/* Override status for celebration */
 	if (g_disp.scans_done >= NUM_WAYPOINTS && pos_x == HOME_X && pos_y == HOME_Y &&
 	    battery >= CRITICAL_BATTERY) {
-		snprintf(g_disp.status, sizeof(g_disp.status), "Mission %d complete!",
-			 state->mission_num);
+		(void)snprintf(g_disp.status, sizeof(g_disp.status), "Mission %d complete!",
+			       state->mission_num);
 	}
 
 #ifdef CONFIG_ROBOT_PATROL_TEST_MODE
@@ -267,8 +266,8 @@ void display_render(struct robot_state *state, int pos_x, int pos_y, int battery
 #endif
 	if (g_disp.scans_done >= NUM_WAYPOINTS && pos_x == HOME_X && pos_y == HOME_Y &&
 	    battery >= CRITICAL_BATTERY) {
-		snprintf(g_disp.status, sizeof(g_disp.status), "Mission %d complete!",
-			 state->mission_num);
+		(void)snprintf(g_disp.status, sizeof(g_disp.status), "Mission %d complete!",
+			       state->mission_num);
 	}
 
 	printf(CUR_HOME);
@@ -304,5 +303,5 @@ void display_render(struct robot_state *state, int pos_x, int pos_y, int battery
 
 	printf("+---------------------------------------------+\n");
 
-	fflush(stdout);
+	(void)fflush(stdout);
 }
