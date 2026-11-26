@@ -22,9 +22,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=-1,
 		.child=-1,
+		.index=0,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="E [action, 0]",
-			.index=0,
 		))
 	},
 	{
@@ -34,9 +34,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=-1,
 		.child=-1,
+		.index=1,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="M [action, 1]",
-			.index=1,
 		))
 	},
 	{
@@ -46,9 +46,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=1,
 		.child=-1,
+		.index=2,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="L [action, 2]",
-			.index=2,
 		))
 	},
 	{
@@ -58,9 +58,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=-1,
 		.child=2,
+		.index=3,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="H [control, 3]",
-			.index=3,
 		))
 	},
 	{
@@ -70,9 +70,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=0,
 		.child=3,
+		.index=4,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="D [control, 4]",
-			.index=4,
 		))
 	},
 	{
@@ -82,9 +82,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=4,
 		.child=-1,
+		.index=5,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="C [action, 5]",
-			.index=5,
 		))
 	},
 	{
@@ -94,9 +94,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=-1,
 		.child=-1,
+		.index=6,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="G [action, 6]",
-			.index=6,
 		))
 	},
 	{
@@ -106,9 +106,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=-1,
 		.child=-1,
+		.index=7,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="K [action, 7]",
-			.index=7,
 		))
 	},
 	{
@@ -118,9 +118,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=7,
 		.child=-1,
+		.index=8,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="J [action, 8]",
-			.index=8,
 		))
 	},
 	{
@@ -130,9 +130,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=8,
 		.child=-1,
+		.index=9,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="I [action, 9]",
-			.index=9,
 		))
 	},
 	{
@@ -142,9 +142,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=6,
 		.child=9,
+		.index=10,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="F [control, 10]",
-			.index=10,
 		))
 	},
 	{
@@ -154,9 +154,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=5,
 		.child=10,
+		.index=11,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="B [control, 11]",
-			.index=11,
 		))
 	},
 	{
@@ -166,9 +166,9 @@ static struct zephyrbt_node zbt_minimal_nodes[] = {
 		))
 		.sibling=-1,
 		.child=11,
+		.index=12,
 		IF_ENABLED(CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO, (
 			.name="A [control, 12]",
-			.index=12,
 		))
 	},
 };

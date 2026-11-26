@@ -21,3 +21,16 @@ tests:
       type: one_line
       regex:
         - "I: Timeout restarted: [0-9]+ ms"
+  samples.zephyrbt.timeout_halt.no_node_info:
+    platform_allow:
+      - qemu_cortex_m3
+      - native_sim/native/64
+    timeout: 30
+    extra_configs:
+      # The blackboard must work without the node information.
+      - CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO=n
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "I: Timeout restarted: [0-9]+ ms"
