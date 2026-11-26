@@ -81,10 +81,12 @@ enum zephyrbt_child_status zephyrbt_action_report_timeout(struct zephyrbt_contex
 
 	int64_t elapsed_ms = k_uptime_get() - reopen_ms;
 
-	if (elapsed_ms >= TIMEOUT_ms) {
-		LOG_INF("Timeout restarted: %lld ms", elapsed_ms);
-	} else {
+	if (elapsed_ms < TIMEOUT_ms) {
 		LOG_ERR("Timeout kept the stale deadline: %lld ms", elapsed_ms);
+	} else if (elapsed_ms >= 2 * TIMEOUT_ms) {
+		LOG_ERR("Timeout took too long: %lld ms", elapsed_ms);
+	} else {
+		LOG_INF("Timeout restarted: %lld ms", elapsed_ms);
 	}
 
 	done = true;
