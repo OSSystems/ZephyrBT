@@ -11,3 +11,4 @@ __pycache__/
 *~
 /deps/
 __init__.py
+/sca-out/

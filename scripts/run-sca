@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Copyright (c) 2026 O.S. Systems Software LTDA.
+# Copyright (c) 2026 Freedom Veiculos Eletricos
+# SPDX-License-Identifier: Apache-2.0
+
+# Run the CodeChecker static code analysis on the sources of this repository
+# and write the reports to <output directory>/codechecker.sarif.
+#
+# Usage: scripts/run-sca [output directory] [extra twister arguments]
+
+set -eu
+
+basedir=$(dirname "$(dirname "$(readlink -f "$0")")")
+cd "$basedir"
+
+outdir=$(readlink -f "${1:-sca-out}")
+shift || true
+mkdir -p "$outdir"
+
+# Analyze only the sources of this repository, not Zephyr, its modules or
+# the files that the generator writes in the build directories.
+skipfile=$outdir/codechecker.skip
+{
+    for dir in include samples subsys; do
+        echo "+$basedir/$dir/*"
+    done
+    echo "-*"
+} >"$skipfile"
+
+# CodeChecker needs the LLVM toolchain.
+#
+# Debug logs, asserts and the node information of the behaviour tree are
+# enabled, so that the analysis also examines the code that only these
+# configurations compile. Without them, the analysis reports false positives,
+# for example variables that only a debug log uses.
+#
+# The analysis must not stop on compiler warnings.
+./deps/zephyr/scripts/twister -G --board-root . \
+    --testsuite-root samples/ \
+    --arch arm \
+    --build-only \
+    --outdir "$outdir/twister-out" \
+    -x ZEPHYR_TOOLCHAIN_VARIANT=zephyr/llvm \
+    -x ZEPHYR_SCA_VARIANT=codechecker \
+    -x "CODECHECKER_ANALYZE_OPTS=--skip;$skipfile" \
+    -x CODECHECKER_PARSE_SKIP=y \
+    -x EXTRA_CFLAGS=-Wno-error \
+    -x CONFIG_LOG=y \
+    -x CONFIG_LOG_OVERRIDE_LEVEL=4 \
+    -x CONFIG_ASSERT=y \
+    -x CONFIG_ZEPHYR_BEHAVIOUR_TREE_NODE_INFO=y \
+    -x CONFIG_ZEPHYR_BEHAVIOUR_TREE_LOG_LEVEL_DBG=y \
+    "$@"
+
+# Without --review-status, the SARIF export keeps the reports that the
+# source marks as false positives. parse exits with 2 when it finds reports.
+mapfile -t plists < <(find "$outdir/twister-out" -type d -name codechecker.plist)
+CodeChecker parse "${plists[@]}" \
+    --ignore "$skipfile" \
+    --review-status unreviewed confirmed \
+    --export sarif \
+    --output "$outdir/all.sarif" || [ $? -eq 2 ]
+
+# Many builds analyze the same source file, and each build reports its
+# findings again.
+jq '.runs[].results |= unique_by(.ruleId, .locations[0].physicalLocation)' \
+    "$outdir/all.sarif" >"$outdir/codechecker.sarif"
