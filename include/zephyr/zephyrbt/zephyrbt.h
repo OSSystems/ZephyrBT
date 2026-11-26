@@ -208,9 +208,9 @@ enum zephyrbt_child_status zephyrbt_evaluate(struct zephyrbt_context *ctx,
 /**
  * @brief Halt a running node and its subtree.
  *
- * Call the halt function of each running node of the subtree, from the
- * leaves to the node, and mark these nodes as not running. Do nothing when
- * the node is not running.
+ * Mark the node as not running, call its halt function, and then halt its
+ * running children in the same way. The Lua _onHalted condition of a node
+ * runs after its subtree halted. Do nothing when the node is not running.
  *
  * @param ctx	The behaviour tree.
  * @param self	The node to halt.
